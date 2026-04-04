@@ -186,6 +186,7 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
                   <h4>{meal.label}</h4>
                   <div className="meal-target">Target {meal.targetCalories} kcal | Actual {mealTotals.calories} kcal</div>
                 </div>
+                <button className="meal-action" type="button" onClick={() => openMealSheet(mealIndex)}>Replace Meal</button>
               </div>
               <div className="food-list">
                 {meal.items.map((item, itemIndex) => (
@@ -202,9 +203,6 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
                     <div className="food-calories">{item.calories} kcal</div>
                   </button>
                 ))}
-              </div>
-              <div className="meal-actions">
-                <button className="meal-action" type="button" onClick={() => openMealSheet(mealIndex)}>Replace Meal</button>
               </div>
             </div>
           );

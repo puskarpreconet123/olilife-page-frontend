@@ -1,7 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function BottomSheet({ open, title, subtitle, options, onClose, onSelect }) {
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  
+  if (!mounted) return null;
+
+  return createPortal(
     <div className={`sheet-backdrop${open ? " show" : ""}`} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="sheet" role="dialog" aria-modal="true" aria-label={title}>
         <div className="sheet-handle" aria-hidden="true" />
@@ -24,6 +30,7 @@ export default function BottomSheet({ open, title, subtitle, options, onClose, o
           }
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

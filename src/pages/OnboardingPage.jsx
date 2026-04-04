@@ -23,20 +23,20 @@ const DEFAULT_STATE = {
 };
 
 function isAgeGenderComplete(s) {
-  const n = Number(s.age);
-  return Number.isFinite(n) && n > 0 && n <= 120 && Boolean(s.gender);
+  const n = Number(s?.age);
+  return Number.isFinite(n) && n > 0 && n <= 120 && Boolean(s?.gender);
 }
 function isHeightComplete(s) {
-  const t = s.height.trim();
+  const t = (s?.height || "").toString().trim();
   if (!t) return false;
-  if (s.heightUnit === "cm") {
+  if (s?.heightUnit === "cm") {
     const v = Number(t);
     return Number.isFinite(v) && v >= 80 && v <= 260;
   }
   return /^\d{1,2}(\.\d{1,2})?$/.test(t);
 }
 function isWeightComplete(s) {
-  const v = Number(s.weight.trim());
+  const v = Number((s?.weight || "").toString().trim());
   return Number.isFinite(v) && v >= 20 && v <= 350;
 }
 function canAdvance(screen, s) {
@@ -59,8 +59,19 @@ function validationMessage(screen) {
   return "Please complete this step before continuing.";
 }
 
+function isProfileComplete(s) {
+  if (!s) return false;
+  return isAgeGenderComplete(s) &&
+         isHeightComplete(s) &&
+         isWeightComplete(s) &&
+         Boolean(s.activityLevel) &&
+         Boolean(s.goal) &&
+         Boolean(s.diabeticStatus) &&
+         (s.chronicConditions || []).length >= 1;
+}
+
 export default function OnboardingPage() {
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn, user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [screen, setScreen]   = useState(0);
   const [profile, setProfile] = useState(DEFAULT_STATE);
@@ -70,16 +81,23 @@ export default function OnboardingPage() {
   // Load saved profile when user is logged in
   useEffect(() => {
     if (!isLoggedIn) return;
-    if (user?.onboardingComplete) { navigate("/dashboard", { state: { profile } }); return; }
+    if (user?.onboardingComplete) { navigate("/dashboard", { state: { profile: user.profile || profile } }); return; }
     api.get("/api/user/profile")
       .then((res) => {
         const saved = res.data.profile;
         if (saved) {
-          setProfile((prev) => ({ ...prev, ...Object.fromEntries(Object.entries(saved).filter(([, v]) => v !== "" && v !== null && v !== undefined)) }));
+          const merged = { ...profile, ...Object.fromEntries(Object.entries(saved).filter(([, v]) => v !== "" && v !== null && v !== undefined)) };
+          setProfile(merged);
+          
+          if (isProfileComplete(merged)) {
+            api.put("/api/user/profile", { onboardingComplete: true }).catch(() => {});
+            if (refreshUser) refreshUser();
+            navigate("/dashboard", { state: { profile: merged } });
+          }
         }
       })
       .catch(() => {});
-  }, [isLoggedIn]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isLoggedIn, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const saveProfile = (updates) => {
     if (!isLoggedIn) return;
@@ -122,8 +140,12 @@ export default function OnboardingPage() {
   const handleLoginSuccess = (u) => {
     setModal(null);
     showToast("Welcome back!");
-    if (u?.onboardingComplete) {
-      navigate("/dashboard", { state: { profile } });
+    if (u?.onboardingComplete || isProfileComplete(u?.profile)) {
+      if (!u?.onboardingComplete) {
+        api.put("/api/user/profile", { onboardingComplete: true }).catch(() => {});
+        if (refreshUser) refreshUser();
+      }
+      navigate("/dashboard", { state: { profile: u?.profile || profile } });
     }
   };
 

@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "../../context/AuthContext";
 
 export default function SignupModal({ onSuccess, onSwitchToLogin, onClose }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const { signup } = useAuth();
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
@@ -26,7 +29,9 @@ export default function SignupModal({ onSuccess, onSwitchToLogin, onClose }) {
     }
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal-box">
         <h3>Create your account</h3>
@@ -87,6 +92,7 @@ export default function SignupModal({ onSuccess, onSwitchToLogin, onClose }) {
           <button type="button" onClick={onSwitchToLogin}>Log in</button>
         </p>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -20,7 +20,7 @@ const DEFAULT_PROFILE = {
 };
 
 export default function DashboardPage() {
-  const { isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -53,8 +53,9 @@ export default function DashboardPage() {
     setSaving(true);
     setProfile(updated);
     try {
-      await api.put("/api/user/profile", { profile: updated });
+      await api.put("/api/user/profile", { profile: updated, onboardingComplete: true });
       showToast("Constraints saved. Regenerate your diet to apply changes.");
+      if (refreshUser) refreshUser();
     } catch {
       showToast("Could not save — check your connection.");
     } finally {
@@ -66,9 +67,18 @@ export default function DashboardPage() {
     setSavedDiet(updatedDiet);
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = async (u) => {
     setModal(null);
-    showToast("Logged in! Your previous diet plan has been restored.");
+    if (modal === "signup") {
+      try {
+        await api.put("/api/user/profile", { profile, onboardingComplete: true });
+        if (refreshUser) refreshUser();
+      } catch (err) {}
+      showToast("Account created and profile saved!");
+    } else {
+      showToast("Logged in! Your previous diet plan has been restored.");
+    }
+
     // Reload profile + diet from DB
     api.get("/api/user/profile")
       .then((res) => {
