@@ -66,6 +66,9 @@ function ToggleRow({ label, options, value, onChange, multi = false }) {
 export default function EditConstraints({ profile, onSave, saving }) {
   const [open, setOpen]     = useState(false);
   const [draft, setDraft]   = useState(profile);
+  const [heightError, setHeightError] = useState("");
+  const [ageError, setAgeError] = useState("");
+  const [weightError, setWeightError] = useState("");
 
   // Sync draft when profile changes from outside (e.g. initial load)
   React.useEffect(() => { setDraft(profile); }, [profile]);
@@ -123,7 +126,7 @@ export default function EditConstraints({ profile, onSave, saving }) {
         <div className="field-group" style={{ gap: 18 }}>
 
           {/* Body metrics row */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, alignItems: "start" }}>
             <div className="field-group" style={{ gap: 6 }}>
               <label className="field-label" style={{ fontSize: "0.82rem" }} htmlFor="ec-age">Age</label>
               <input
@@ -132,11 +135,26 @@ export default function EditConstraints({ profile, onSave, saving }) {
                 inputMode="numeric"
                 placeholder="Age"
                 type="number"
-                min="1" max="120"
+                min="1" max="90"
                 value={draft.age}
-                onChange={(e) => set("age", e.target.value.replace(/[^\d]/g, ""))}
+                onChange={(e) => {
+                  let val = e.target.value.replace(/[^\d]/g, "");
+                  if (val) {
+                    if (parseInt(val, 10) > 90) {
+                      val = "90";
+                      setAgeError("Max age is 90.");
+                    } else {
+                      setAgeError("");
+                    }
+                  } else {
+                    setAgeError("");
+                  }
+                  if (e.target.value !== val) e.target.value = val;
+                  set("age", val);
+                }}
                 style={{ padding: "12px 14px" }}
               />
+              {ageError && <div style={{ color: "#c62828", fontSize: "0.82rem", marginTop: "-2px" }}>{ageError}</div>}
             </div>
             <div className="field-group" style={{ gap: 6 }}>
               <label className="field-label" style={{ fontSize: "0.82rem" }} htmlFor="ec-weight">Weight (kg)</label>
@@ -147,9 +165,24 @@ export default function EditConstraints({ profile, onSave, saving }) {
                 placeholder="kg"
                 type="text"
                 value={draft.weight}
-                onChange={(e) => set("weight", e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1"))}
+                onChange={(e) => {
+                  let val = e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
+                  if (val) {
+                    if (parseFloat(val) > 150) {
+                      val = "150";
+                      setWeightError("Max weight is 150 kg.");
+                    } else {
+                      setWeightError("");
+                    }
+                  } else {
+                    setWeightError("");
+                  }
+                  if (e.target.value !== val) e.target.value = val;
+                  set("weight", val);
+                }}
                 style={{ padding: "12px 14px" }}
               />
+              {weightError && <div style={{ color: "#c62828", fontSize: "0.82rem", marginTop: "-2px" }}>{weightError}</div>}
             </div>
           </div>
 
@@ -164,7 +197,22 @@ export default function EditConstraints({ profile, onSave, saving }) {
                   placeholder={draft.heightUnit === "cm" ? "cm" : "feet"}
                   type="text"
                   value={draft.height}
-                  onChange={(e) => set("height", e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1"))}
+                  onChange={(e) => {
+                    let val = e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
+                    if (val) {
+                      const max = draft.heightUnit === "cm" ? 300 : 10;
+                      if (parseFloat(val) > max) {
+                        val = max.toString();
+                        setHeightError(`Maximum allowed height is ${max} ${draft.heightUnit}.`);
+                      } else {
+                        setHeightError("");
+                      }
+                    } else {
+                      setHeightError("");
+                    }
+                    if (e.target.value !== val) e.target.value = val;
+                    set("height", val);
+                  }}
                   style={{ padding: "12px 14px" }}
                 />
               </div>
@@ -174,12 +222,19 @@ export default function EditConstraints({ profile, onSave, saving }) {
                   type="button"
                   className={`chip-button${draft.heightUnit === u ? " selected" : ""}`}
                   style={{ fontSize: "0.78rem", padding: "10px 14px", flexShrink: 0 }}
-                  onClick={() => set("heightUnit", u)}
+                  onClick={() => {
+                    if (draft.heightUnit !== u) {
+                      setHeightError("");
+                      set("heightUnit", u);
+                      set("height", "");
+                    }
+                  }}
                 >
                   {u}
                 </button>
               ))}
             </div>
+            {heightError && <div style={{ color: "#c62828", fontSize: "0.82rem", marginTop: "2px" }}>{heightError}</div>}
           </div>
 
           <ToggleRow label="Gender"         options={GENDERS}          value={draft.gender}         onChange={(v) => set("gender", v)} />

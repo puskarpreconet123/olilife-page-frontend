@@ -208,7 +208,7 @@ button { -webkit-tap-highlight-color: transparent; }
 }
 .choice-button.selected, .unit-button.selected, .option-card.selected, .chip-button.selected, .condition-card.selected {
   background: linear-gradient(135deg, var(--green-900), var(--green-500));
-  color: var(--white); border-color: transparent; box-shadow: 0 14px 24px rgba(27,94,32,0.22);
+  color: var(--white); border-color: var(--green-700); box-shadow: 0 14px 24px rgba(27,94,32,0.22);
 }
 .allergy-extra.hidden { display: none; }
 
@@ -245,6 +245,7 @@ button { -webkit-tap-highlight-color: transparent; }
   padding: 24px 18px 18px;
   background: radial-gradient(circle at top right, rgba(255,255,255,0.25), transparent 32%),
     linear-gradient(145deg, rgba(27,94,32,0.98), rgba(76,175,80,0.92));
+  border: #1b5e20;
   color: var(--white);
 }
 .dashboard-eyebrow {
@@ -280,6 +281,8 @@ button { -webkit-tap-highlight-color: transparent; }
 .macro-fill.protein { background: linear-gradient(90deg, #2e7d32, #66bb6a); }
 .macro-fill.carb { background: linear-gradient(90deg, #8d6e63, #bcaaa4); }
 .macro-fill.fat { background: linear-gradient(90deg, #558b2f, #9ccc65); }
+
+.meal-list { margin-top: 18px; }
 
 .meal-card { padding: 16px; border-radius: 22px; }
 .meal-top { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 12px; }

@@ -136,7 +136,7 @@ export default function DashboardPage() {
             <h2>Personalized wellness overview.</h2>
             <p>Your body metrics, health conditions, diet plan, and product recommendations update together as you edit your constraints.</p>
             <div className="dashboard-actions">
-              <button className="btn btn-secondary" type="button" onClick={() => navigate("/")}>Back to Onboarding</button>
+              <button className="btn btn-secondary" type="button" onClick={() => navigate("/", { state: { fromDashboard: true } })}>Back to Onboarding</button>
               <button
                 className="btn btn-subtle"
                 type="button"

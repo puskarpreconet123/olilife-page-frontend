@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 
 export default function WeightScreen({ state, onChange, onNext, onBack, canAdvance }) {
+  const [weightError, setWeightError] = useState("");
   return (
     <article className="screen active" aria-labelledby="weightTitle">
       <div className="panel-card">
@@ -18,9 +19,21 @@ export default function WeightScreen({ state, onChange, onNext, onBack, canAdvan
             placeholder="Enter your weight"
             type="text"
             value={state.weight}
-            onChange={(e) => onChange("weight", e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1"))}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
+              if (raw && parseFloat(raw) > 150) {
+                setWeightError("Maximum allowed weight is 150 kg.");
+                onChange("weight", "150");
+              } else {
+                setWeightError("");
+                onChange("weight", raw);
+              }
+            }}
           />
           <span className="input-suffix">kg</span>
+        </div>
+        <div style={{ minHeight: "18px", marginTop: "2px" }}>
+          {weightError && <div style={{ color: "#c62828", fontSize: "0.82rem" }}>{weightError}</div>}
         </div>
       </div>
       <div className="insight-strip">

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../utils/api";
 import ProgressBar from "../components/shared/ProgressBar";
@@ -24,20 +24,20 @@ const DEFAULT_STATE = {
 
 function isAgeGenderComplete(s) {
   const n = Number(s?.age);
-  return Number.isFinite(n) && n > 0 && n <= 120 && Boolean(s?.gender);
+  return Number.isFinite(n) && n > 0 && n <= 90 && Boolean(s?.gender);
 }
 function isHeightComplete(s) {
   const t = (s?.height || "").toString().trim();
   if (!t) return false;
   if (s?.heightUnit === "cm") {
     const v = Number(t);
-    return Number.isFinite(v) && v >= 80 && v <= 260;
+    return Number.isFinite(v) && v >= 30 && v <= 300;
   }
-  return /^\d{1,2}(\.\d{1,2})?$/.test(t);
+  return /^\d{1,2}(\.\d{1,2})?$/.test(t) && Number(t) <= 10;
 }
 function isWeightComplete(s) {
   const v = Number((s?.weight || "").toString().trim());
-  return Number.isFinite(v) && v >= 20 && v <= 350;
+  return Number.isFinite(v) && v >= 10 && v <= 150;
 }
 function canAdvance(screen, s) {
   if (screen === 0) return true;
@@ -73,6 +73,7 @@ function isProfileComplete(s) {
 export default function OnboardingPage() {
   const { isLoggedIn, user, refreshUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [screen, setScreen]   = useState(0);
   const [profile, setProfile] = useState(DEFAULT_STATE);
   const [modal, setModal]     = useState(null); // "signup" | "login" | null
@@ -81,7 +82,10 @@ export default function OnboardingPage() {
   // Load saved profile when user is logged in
   useEffect(() => {
     if (!isLoggedIn) return;
-    if (user?.onboardingComplete) { navigate("/dashboard", { state: { profile: user.profile || profile } }); return; }
+    if (user?.onboardingComplete && !location.state?.fromDashboard) { 
+      navigate("/dashboard", { state: { profile: user.profile || profile } }); 
+      return; 
+    }
     api.get("/api/user/profile")
       .then((res) => {
         const saved = res.data.profile;
@@ -89,7 +93,7 @@ export default function OnboardingPage() {
           const merged = { ...profile, ...Object.fromEntries(Object.entries(saved).filter(([, v]) => v !== "" && v !== null && v !== undefined)) };
           setProfile(merged);
           
-          if (isProfileComplete(merged)) {
+          if (isProfileComplete(merged) && !location.state?.fromDashboard) {
             api.put("/api/user/profile", { onboardingComplete: true }).catch(() => {});
             if (refreshUser) refreshUser();
             navigate("/dashboard", { state: { profile: merged } });
@@ -118,6 +122,11 @@ export default function OnboardingPage() {
   const handleNext = () => {
     if (!canAdvance(screen, profile)) {
       showToast(validationMessage(screen));
+      return;
+    }
+    // If user is already finished and at welcome, let them skip directly back to dash
+    if (screen === 0 && user?.onboardingComplete) {
+      navigate("/dashboard", { state: { profile } });
       return;
     }
     if (screen === 6) {

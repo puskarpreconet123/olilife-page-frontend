@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 
 export default function HeightScreen({ state, onChange, onNext, onBack, canAdvance }) {
+  const [error, setError] = useState("");
+
   return (
     <article className="screen active" aria-labelledby="heightTitle">
       <div className="panel-card">
@@ -15,7 +17,13 @@ export default function HeightScreen({ state, onChange, onNext, onBack, canAdvan
               key={unit}
               className={`unit-button${state.heightUnit === unit ? " selected" : ""}`}
               type="button"
-              onClick={() => onChange("heightUnit", unit)}
+              onClick={() => {
+                if (state.heightUnit !== unit) {
+                  setError("");
+                  onChange("heightUnit", unit);
+                  onChange("height", "");
+                }
+              }}
             >
               {unit === "cm" ? "Centimeters" : "Feet"}
             </button>
@@ -33,8 +41,22 @@ export default function HeightScreen({ state, onChange, onNext, onBack, canAdvan
             placeholder={state.heightUnit === "cm" ? "Enter your height in cm" : "Enter your height in feet"}
             type="text"
             value={state.height}
-            onChange={(e) => onChange("height", e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1"))}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
+              const max = state.heightUnit === "cm" ? 300 : 10;
+              
+              if (raw && parseFloat(raw) > max) {
+                setError(`Maximum allowed height is ${max} ${state.heightUnit}.`);
+                onChange("height", max.toString());
+              } else {
+                setError("");
+                onChange("height", raw);
+              }
+            }}
           />
+        </div>
+        <div style={{ minHeight: "18px", marginTop: "2px" }}>
+          {error && <div style={{ color: "#c62828", fontSize: "0.82rem" }}>{error}</div>}
         </div>
       </div>
       <div className="insight-strip">

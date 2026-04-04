@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 
 const GENDERS = ["female", "male", "other"];
 
 export default function AgeGenderScreen({ state, onChange, onNext, onBack, canAdvance }) {
+  const [ageError, setAgeError] = useState("");
   return (
     <article className="screen active" aria-labelledby="ageGenderTitle">
       <div className="panel-card">
@@ -16,13 +17,24 @@ export default function AgeGenderScreen({ state, onChange, onNext, onBack, canAd
             className="text-input"
             id="ageInput"
             inputMode="numeric"
-            min="1" max="120"
             name="age"
             placeholder="Enter your age"
-            type="number"
+            type="text"
             value={state.age}
-            onChange={(e) => onChange("age", e.target.value.replace(/[^\d]/g, ""))}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/[^\d]/g, "");
+              if (raw && parseInt(raw, 10) > 90) {
+                setAgeError("Maximum allowed age is 90.");
+                onChange("age", "90");
+              } else {
+                setAgeError("");
+                onChange("age", raw);
+              }
+            }}
           />
+        </div>
+        <div style={{ minHeight: "18px", marginTop: "2px" }}>
+          {ageError && <div style={{ color: "#c62828", fontSize: "0.82rem" }}>{ageError}</div>}
         </div>
       </div>
       <div className="panel-card field-group">
