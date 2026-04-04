@@ -59,7 +59,7 @@ const FOOD_SEEDS = {
     ["Kala Chana Bowl",    132, 10, 17, 3, "lunch|snacks|dinner",     "veg|diabetic-friendly|low-fat"],
     ["Sambar",              96,  6, 12, 2, "breakfast|lunch|dinner",  "veg|easy-digest|low-fat|detox-friendly"],
     ["Roasted Chana",       78,  5, 11, 1, "snacks|dessert|lunch",    "veg|diabetic-friendly|low-fat"],
-    ["Soy Chunk Masala",   146, 19,  8, 4, "lunch|dinner|snacks",     "veg|soy|protein-heavy|balanced-energy"],
+    ["Soya Chunk Masala",   146, 19,  8, 4, "lunch|dinner|snacks",     "veg|soy|protein-heavy|balanced-energy"],
     ["Hung Curd Mousse",    54,  6,  4, 1, "dessert|snacks|breakfast","veg|dairy|low-fat|easy-digest"],
     ["Paneer Tikka",       142, 14,  4, 7, "lunch|dinner|snacks",     "veg|dairy|balanced-energy|protein-heavy"],
     ["Lentil Soup",         88,  7, 11, 2, "lunch|dinner|snacks",     "veg|easy-digest|detox-friendly|low-fat"]
