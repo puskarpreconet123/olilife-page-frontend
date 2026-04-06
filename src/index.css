@@ -182,7 +182,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .segment-grid, .dashboard-actions, .diet-summary, .diet-toolbar,
 .footer-actions, .option-grid, .stats-grid { grid-template-columns: repeat(2, 1fr); }
 .footer-actions.single { grid-template-columns: 1fr; }
-
+.diet-summary {margin-top: 5px;}
 /* Buttons */
 .choice-button, .unit-button, .option-card, .chip-button, .condition-card, .meal-action, .sheet-option, .food-swap {
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease, color 180ms ease;
