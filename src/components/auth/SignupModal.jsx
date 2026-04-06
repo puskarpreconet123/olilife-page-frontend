@@ -4,7 +4,13 @@ import { useAuth } from "../../context/AuthContext";
 
 export default function SignupModal({ onSuccess, onSwitchToLogin, onClose }) {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+    const raf = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   const { signup } = useAuth();
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
@@ -32,65 +38,82 @@ export default function SignupModal({ onSuccess, onSwitchToLogin, onClose }) {
   if (!mounted) return null;
 
   return createPortal(
-    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <div
+      className={`modal-overlay${visible ? " show" : ""}`}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
       <div className="modal-box">
-        <h3>Create your account</h3>
-        <p>Sign up to save your wellness profile and personalized plan.</p>
-        {error && <div className="modal-error">{error}</div>}
-        <form onSubmit={handleSubmit} className="field-group" noValidate>
-          <div className="field-group">
-            <label className="field-label" htmlFor="signup-email">Email</label>
-            <div className="input-shell">
-              <input
-                className="text-input"
-                id="signup-email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-              />
+        <div className="modal-header">
+          <button className="modal-close-btn" type="button" aria-label="Close" onClick={onClose}>✕</button>
+          <div className="modal-brand-icon">🌱</div>
+          <h3>Create your account</h3>
+          <p>Sign up to save your wellness profile and personalized plan.</p>
+        </div>
+
+        <div className="modal-body">
+          {error && (
+            <div className="modal-error">
+              <span className="modal-error-icon">⚠</span>
+              {error}
             </div>
-          </div>
-          <div className="field-group">
-            <label className="field-label" htmlFor="signup-password">Password</label>
-            <div className="input-shell">
-              <input
-                className="text-input"
-                id="signup-password"
-                type="password"
-                placeholder="At least 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-              />
+          )}
+
+          <form onSubmit={handleSubmit} className="field-group" noValidate>
+            <div className="field-group">
+              <label className="field-label" htmlFor="signup-email">Email</label>
+              <div className="input-shell">
+                <input
+                  className="text-input"
+                  id="signup-email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                />
+              </div>
             </div>
-          </div>
-          <div className="field-group">
-            <label className="field-label" htmlFor="signup-confirm">Confirm password</label>
-            <div className="input-shell">
-              <input
-                className="text-input"
-                id="signup-confirm"
-                type="password"
-                placeholder="Repeat password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                autoComplete="new-password"
-              />
+            <div className="field-group">
+              <label className="field-label" htmlFor="signup-password">Password</label>
+              <div className="input-shell">
+                <input
+                  className="text-input"
+                  id="signup-password"
+                  type="password"
+                  placeholder="At least 6 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+              </div>
             </div>
-          </div>
-          <div className="auth-actions">
-            <button className="btn btn-primary" type="submit" disabled={loading}>
-              {loading ? "Creating account…" : "Create Account"}
-            </button>
-            <button className="btn btn-secondary" type="button" onClick={onClose}>Cancel</button>
-          </div>
-        </form>
-        <p className="modal-switch">
-          Already have an account?{" "}
-          <button type="button" onClick={onSwitchToLogin}>Log in</button>
-        </p>
+            <div className="field-group">
+              <label className="field-label" htmlFor="signup-confirm">Confirm password</label>
+              <div className="input-shell">
+                <input
+                  className="text-input"
+                  id="signup-confirm"
+                  type="password"
+                  placeholder="Repeat password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  autoComplete="new-password"
+                />
+              </div>
+            </div>
+            <div className="auth-actions">
+              <button className="btn btn-primary" type="submit" disabled={loading}>
+                {loading ? "Creating account…" : "Create Account"}
+              </button>
+              <button className="btn btn-secondary" type="button" onClick={onClose}>Cancel</button>
+            </div>
+          </form>
+
+          <p className="modal-switch">
+            Already have an account?{" "}
+            <button type="button" onClick={onSwitchToLogin}>Log in</button>
+          </p>
+        </div>
       </div>
     </div>,
     document.body

@@ -86,11 +86,15 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
       open: true,
       title: `Replace ${meal.label}`,
       subtitle: "Pick a fresh combo that still fits your calorie and macro balance.",
-      options: getAlternativeMeals(meal, mealIndex, state).map((c) => ({
-        label: `${c.label} | ${getMealTotals(c.items).calories} kcal`,
-        subtitle: c.items.map((i) => i.name).join(" | "),
-        value: { type: "meal", mealIndex, meal: c }
-      }))
+      options: getAlternativeMeals(meal, mealIndex, state).map((c) => {
+        const totals = getMealTotals(c.items);
+        return {
+          label: c.label,
+          subtitle: `Meal | ${totals.calories} kcal | ${roundOne(totals.protein)}P / ${roundOne(totals.carbs)}C / ${roundOne(totals.fats)}F`,
+          foods: c.items.map((i) => i.name).join(", "),
+          value: { type: "meal", mealIndex, meal: c }
+        };
+      })
     });
   };
 
@@ -179,30 +183,60 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
       <div className="meal-list">
         {meals.map((meal, mealIndex) => {
           const mealTotals = getMealTotals(meal.items);
+          const icon = meal.label.toLowerCase().includes("breakfast") ? "🍳" :
+                       meal.label.toLowerCase().includes("lunch") ? "🍱" :
+                       meal.label.toLowerCase().includes("dinner") ? "🥗" :
+                       meal.label.toLowerCase().includes("snack") ? "🍏" : "🍴";
+
+          // Calculate macro percentages for the bar
+          const totalMacros = mealTotals.protein + mealTotals.carbs + mealTotals.fats || 1;
+          const pPct = (mealTotals.protein / totalMacros) * 100;
+          const cPct = (mealTotals.carbs / totalMacros) * 100;
+          const fPct = (mealTotals.fats / totalMacros) * 100;
+
           return (
-            <div key={mealIndex} className="meal-card">
+            <div
+              key={mealIndex}
+              className="meal-card"
+              style={{
+                animation: `slideUpFadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards ${mealIndex * 0.15}s`,
+                opacity: 0,
+                marginBottom: "32px"
+              }}
+            >
               <div className="meal-top">
-                <div>
-                  <h4>{meal.label}</h4>
-                  <div className="meal-target">Target {meal.targetCalories} kcal | Actual {mealTotals.calories} kcal</div>
+                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                  <span className="meal-badge">{icon}</span>
+                  <div>
+                    <h4 style={{ fontSize: "1.1rem", fontWeight: "800" }}>{meal.label}</h4>
+                    <div className="meal-target">Target {meal.targetCalories} kcal | Actual {mealTotals.calories} kcal</div>
+                  </div>
                 </div>
-                <button className="meal-action" type="button" onClick={() => openMealSheet(mealIndex)}>Replace Meal</button>
+                <button className="meal-action" type="button" onClick={() => openMealSheet(mealIndex)}>Replace</button>
               </div>
+
               <div className="food-list">
                 {meal.items.map((item, itemIndex) => (
                   <button
                     key={itemIndex}
-                    className="food-swap"
+                    className={`food-swap ${item.category.toLowerCase()}`}
                     type="button"
                     onClick={() => openItemSheet(mealIndex, itemIndex)}
                   >
                     <div className="food-main">
-                      <strong>{item.name}</strong>
-                      <span>{titleCase(item.category)} | {item.portionFactor.toFixed(1)}x serving | {roundOne(item.protein)}P / {roundOne(item.carbs)}C / {roundOne(item.fats)}F</span>
+                      <span className={`food-category-tag ${item.category.toLowerCase()}`}>{item.category}</span>
+                      <strong style={{ display: "block", marginBottom: "2px" }}>{item.name}</strong>
+                      <span style={{ fontSize: "0.8rem" }}>{item.portionFactor.toFixed(1)}x serving | {roundOne(item.protein)}P / {roundOne(item.carbs)}C / {roundOne(item.fats)}F</span>
                     </div>
                     <div className="food-calories">{item.calories} kcal</div>
                   </button>
                 ))}
+              </div>
+
+              <div className="meal-macro-bar" title="Protein / Carbs / Fats balance">
+                <div className="meal-macro-segment protein" style={{ width: `${pPct}%` }} />
+                <div className="meal-macro-segment carb" style={{ width: `${cPct}%` }} />
+                <div className="meal-macro-segment fat" style={{ width: `${fPct}%` }} />
               </div>
             </div>
           );
