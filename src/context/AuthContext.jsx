@@ -16,18 +16,21 @@ export function AuthProvider({ children }) {
 
   const signup = async (email, password) => {
     const res = await api.post("/api/auth/signup", { email, password });
+    localStorage.setItem("token", res.data.token);
     setUser(res.data.user);
     return res.data.user;
   };
 
   const login = async (email, password) => {
     const res = await api.post("/api/auth/login", { email, password });
+    localStorage.setItem("token", res.data.token);
     setUser(res.data.user);
     return res.data.user;
   };
 
   const logout = async () => {
-    await api.post("/api/auth/logout");
+    try { await api.post("/api/auth/logout"); } catch {}
+    localStorage.removeItem("token");
     setUser(null);
   };
 
