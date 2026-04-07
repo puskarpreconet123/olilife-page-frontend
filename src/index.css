@@ -450,6 +450,8 @@ button {
   grid-template-columns: repeat(2, 1fr);
 }
 
+.dashboard-actions{margin-top: 10px;}
+
 .footer-actions.single {
   grid-template-columns: 1fr;
 }
