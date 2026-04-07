@@ -71,7 +71,7 @@ function isProfileComplete(s) {
 }
 
 export default function OnboardingPage() {
-  const { isLoggedIn, user, refreshUser } = useAuth();
+  const { isLoggedIn, user, refreshUser, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [screen, setScreen]   = useState(0);
@@ -158,13 +158,28 @@ export default function OnboardingPage() {
     }
   };
 
+  const handleLogout = async () => {
+    await logout();
+    setProfile(DEFAULT_STATE);
+    setScreen(0);
+    showToast("Logged out successfully");
+  };
+
   const screenProps = { state: profile, onChange, onNext: handleNext, onBack: handleBack, canAdvance: canAdvance(screen, profile) };
 
   return (
     <main className="app-shell app-shell--onboarding" aria-label="Olilife onboarding app">
       <div className="status-bar" aria-hidden="true" />
       <div className="app-inner">
-        <ProgressBar current={screen} total={TOTAL_SCREENS} />
+        <ProgressBar
+          current={screen}
+          total={TOTAL_SCREENS}
+          action={isLoggedIn && (
+            <button className="btn btn-subtle" type="button" style={{ padding: "8px 14px", fontSize: "0.82rem" }} onClick={handleLogout}>
+              Log Out
+            </button>
+          )}
+        />
         <section className="screen-frame">
           {screen === 0 && (
             <WelcomeScreen

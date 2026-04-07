@@ -171,7 +171,7 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
         <div className="diet-summary-card">
           <span className="stat-label">Planned Calories</span>
           <strong className="stat-value">{totals.calories}</strong>
-          <div className="stat-sub">Remaining {remaining >= 0 ? remaining : `-${Math.abs(remaining)}`} kcal</div>
+          <div className="stat-sub">{remaining >= 0 ? `Remaining ${remaining} kcal` : `Exceeded by ${Math.abs(remaining)} kcal`}</div>
         </div>
         <div className="diet-summary-card">
           <span className="stat-label">Live Macros</span>

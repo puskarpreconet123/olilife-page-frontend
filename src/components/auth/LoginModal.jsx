@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useAuth } from "../../context/AuthContext";
+import ForgotPasswordModal from "./ForgotPasswordModal";
 
 export default function LoginModal({ onSuccess, onSwitchToSignup, onClose }) {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
   useEffect(() => {
     setMounted(true);
     const raf = requestAnimationFrame(() => setVisible(true));
@@ -33,6 +35,15 @@ export default function LoginModal({ onSuccess, onSwitchToSignup, onClose }) {
   };
 
   if (!mounted) return null;
+
+  if (showForgot) {
+    return (
+      <ForgotPasswordModal
+        onClose={onClose}
+        onBackToLogin={() => setShowForgot(false)}
+      />
+    );
+  }
 
   return createPortal(
     <div
@@ -71,7 +82,12 @@ export default function LoginModal({ onSuccess, onSwitchToSignup, onClose }) {
               </div>
             </div>
             <div className="field-group">
-              <label className="field-label" htmlFor="login-password">Password</label>
+              <div className="field-label-row">
+                <label className="field-label" htmlFor="login-password">Password</label>
+                <button type="button" className="forgot-link" onClick={() => setShowForgot(true)}>
+                  Forgot password?
+                </button>
+              </div>
               <div className="input-shell">
                 <input
                   className="text-input"

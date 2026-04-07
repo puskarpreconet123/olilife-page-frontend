@@ -12,6 +12,7 @@ import EditConstraints from "../components/dashboard/EditConstraints";
 import LoginModal from "../components/auth/LoginModal";
 import SignupModal from "../components/auth/SignupModal";
 import Toast, { showToast } from "../components/shared/Toast";
+import useScrollReveal from "../hooks/useScrollReveal";
 
 const DEFAULT_PROFILE = {
   age: "", gender: "", height: "", heightUnit: "cm", weight: "",
@@ -23,6 +24,7 @@ export default function DashboardPage() {
   const { isLoggedIn, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  useScrollReveal();
 
   const [profile, setProfile]       = useState(location.state?.profile || DEFAULT_PROFILE);
   const [savedDiet, setSavedDiet]   = useState(null);
@@ -131,7 +133,7 @@ export default function DashboardPage() {
         <div className="dashboard-content">
 
           {/* Hero card — full width */}
-          <div className="panel-card dashboard-hero">
+          <div className="panel-card dashboard-hero reveal">
             <span className="dashboard-eyebrow">Your Olilife dashboard</span>
             <h2>Personalized wellness overview.</h2>
             <p>Your body metrics, health conditions, diet plan, and product recommendations update together as you edit your constraints.</p>
@@ -154,16 +156,18 @@ export default function DashboardPage() {
             <div className="dashboard-col">
 
               {/* Edit constraints — collapsible inline editor */}
-              <EditConstraints profile={profile} onSave={handleConstraintsSave} saving={saving} />
+              <div className="reveal stagger-1">
+                <EditConstraints profile={profile} onSave={handleConstraintsSave} saving={saving} />
+              </div>
 
               {/* Health overview */}
-              <section className="panel-card section-card">
+              <section className="panel-card section-card reveal stagger-2">
                 <div className="section-head"><div><h3>Health Overview</h3><p>Conditions, body metrics, and calorie targets come first.</p></div></div>
                 <StatsGrid metrics={metrics} state={profile} />
               </section>
 
               {/* Health summary pills */}
-              <section className="panel-card section-card">
+              <section className="panel-card section-card reveal stagger-3">
                 <div className="section-head"><div><h3>Health Summary</h3><p>Conditions and sensitivities stay visible throughout the plan.</p></div></div>
                 <div className="summary-row">
                   <span className="summary-pill">Diabetic: {formatDiabeticStatus(profile.diabeticStatus)}</span>
@@ -173,13 +177,13 @@ export default function DashboardPage() {
               </section>
 
               {/* Macro targets */}
-              <section className="panel-card section-card">
+              <section className="panel-card section-card reveal stagger-4">
                 <div className="section-head"><div><h3>Macro Targets</h3><p>Targets adapt to your goal and daily calorie needs.</p></div></div>
                 <MacroTargets metrics={metrics} />
               </section>
 
               {/* Tips */}
-              <section className="panel-card section-card">
+              <section className="panel-card section-card reveal stagger-5">
                 <div className="section-head"><div><h3>Personalized Guidance</h3><p>Tailored to your goal, diabetic profile, and conditions.</p></div></div>
                 <TipsList state={profile} />
               </section>
@@ -190,7 +194,7 @@ export default function DashboardPage() {
             <div className="dashboard-col">
 
               {/* Diet generator */}
-              <section className="panel-card section-card" id="diet-section">
+              <section className="panel-card section-card reveal-right" id="diet-section">
                 <div className="section-head">
                   <div>
                     <h3>Diet Generator</h3>
@@ -206,7 +210,7 @@ export default function DashboardPage() {
               </section>
 
               {/* Products */}
-              <section className="panel-card section-card">
+              <section className="panel-card section-card reveal-pop stagger-2">
                 <div className="section-head"><div><h3>Product Recommendations</h3><p>Most relevant Olilife suggestions based on your conditions.</p></div></div>
                 <ProductSection state={profile} savedDiet={savedDiet} />
               </section>
