@@ -450,8 +450,6 @@ button {
   grid-template-columns: repeat(2, 1fr);
 }
 
-.dashboard-actions{margin-top: 10px;}
-
 .footer-actions.single {
   grid-template-columns: 1fr;
 }
@@ -802,10 +800,9 @@ button {
   margin-bottom: 20px;
 }
 
-.meal-top h4,
-.meal-title {
+.meal-top h4 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
@@ -1539,82 +1536,6 @@ button {
   html,
   body {
     overflow-x: hidden;
-  }
-
-  /* ── Meal cards mobile fixes ──────────────────────────── */
-  .meal-card {
-    padding: 16px 14px;
-    border-radius: 20px;
-    margin-bottom: 20px !important;
-  }
-
-  .meal-top {
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-
-  .meal-top > div:first-child {
-    gap: 8px !important;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .meal-top h4,
-  .meal-title {
-    font-size: 1rem !important;
-  }
-
-  .meal-target {
-    font-size: 0.75rem !important;
-  }
-
-  .meal-badge {
-    width: 28px;
-    height: 28px;
-    font-size: 0.95rem;
-  }
-
-  .meal-action {
-    padding: 8px 14px;
-    font-size: 0.78rem;
-    border-radius: 14px;
-    white-space: nowrap;
-  }
-
-  .food-list {
-    gap: 8px;
-  }
-
-  .food-swap {
-    padding: 12px 14px;
-    gap: 10px;
-    border-radius: 16px;
-  }
-
-  .food-main strong {
-    font-size: 0.88rem;
-  }
-
-  .food-main span {
-    font-size: 0.72rem !important;
-  }
-
-  .food-category-tag {
-    font-size: 0.62rem;
-    padding: 1px 6px;
-    margin-bottom: 2px;
-  }
-
-  .food-calories {
-    min-width: auto;
-    font-size: 0.88rem;
-    white-space: nowrap;
-  }
-
-  .meal-macro-bar {
-    margin-top: 10px;
   }
 }
 

@@ -205,10 +205,10 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
               }}
             >
               <div className="meal-top">
-                <div style={{ display: "flex", gap: "12px", alignItems: "center", flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                   <span className="meal-badge">{icon}</span>
-                  <div style={{ minWidth: 0 }}>
-                    <h4 className="meal-title">{meal.label}</h4>
+                  <div>
+                    <h4 style={{ fontSize: "1.1rem", fontWeight: "800" }}>{meal.label}</h4>
                     <div className="meal-target">Target {meal.targetCalories} kcal | Actual {mealTotals.calories} kcal</div>
                   </div>
                 </div>

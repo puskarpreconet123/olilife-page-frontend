@@ -140,7 +140,7 @@ export default function DashboardPage() {
             <div className="dashboard-actions">
               <button className="btn btn-secondary" type="button" onClick={() => navigate("/", { state: { fromDashboard: true } })}>Back to Onboarding</button>
               <button
-                className="btn btn-primary"
+                className="btn btn-subtle"
                 type="button"
                 onClick={() => document.getElementById("diet-section")?.scrollIntoView({ behavior: "smooth" })}
               >
