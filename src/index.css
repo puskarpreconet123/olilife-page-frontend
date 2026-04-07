@@ -135,6 +135,12 @@ button {
   font-weight: 800;
 }
 
+.brand-logo {
+  height: 26px;
+  width: auto;
+  display: block;
+}
+
 .step-indicator {
   font-size: 0.82rem;
   font-weight: 700;

@@ -175,7 +175,7 @@ export default function OnboardingPage() {
           current={screen}
           total={TOTAL_SCREENS}
           action={isLoggedIn && (
-            <button className="btn btn-subtle" type="button" style={{ padding: "8px 14px", fontSize: "0.82rem" }} onClick={handleLogout}>
+            <button className="btn btn-subtle" type="button" style={{ padding: "10px 18px", fontSize: "0.88rem" }} onClick={handleLogout}>
               Log Out
             </button>
           )}

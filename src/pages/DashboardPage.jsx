@@ -122,10 +122,10 @@ export default function DashboardPage() {
         {/* Top bar */}
         <header className="topbar">
           <div className="brand-row">
-            <div className="brand-pill"><span className="brand-mark">O</span>Olilife</div>
+            <div className="brand-pill"><img src="/olilife_logo-300x95.webp" alt="Olilife" className="brand-logo" /></div>
             {isLoggedIn
-              ? <button className="btn btn-subtle" style={{ padding: "8px 14px", fontSize: "0.82rem" }} onClick={handleLogout}>Log Out</button>
-              : <button className="btn btn-subtle" style={{ padding: "8px 14px", fontSize: "0.82rem" }} onClick={() => setModal("login")}>Log In</button>
+              ? <button className="btn btn-subtle" style={{ padding: "10px 18px", fontSize: "0.88rem" }} onClick={handleLogout}>Log Out</button>
+              : <button className="btn btn-subtle" style={{ padding: "10px 18px", fontSize: "0.88rem" }} onClick={() => setModal("login")}>Log In</button>
             }
           </div>
         </header>

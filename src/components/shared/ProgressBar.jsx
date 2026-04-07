@@ -6,7 +6,7 @@ export default function ProgressBar({ current, total, action }) {
     <header className="topbar">
       <div className="brand-row">
         <div className="brand-pill">
-          <span className="brand-mark">O</span>Olilife
+          <img src="/olilife_logo-300x95.webp" alt="Olilife" className="brand-logo" />
         </div>
         <div className="brand-row-right">
           <div className="step-indicator">Step {current + 1} of {total}</div>
