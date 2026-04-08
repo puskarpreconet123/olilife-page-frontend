@@ -82,6 +82,13 @@ export default function OnboardingPage() {
   // Load saved profile when user is logged in
   useEffect(() => {
     if (!isLoggedIn) return;
+
+    // Redirect admins to admin panel
+    if (user?.role === "admin") {
+      navigate("/admin", { replace: true });
+      return;
+    }
+
     if (user?.onboardingComplete && !location.state?.fromDashboard) { 
       navigate("/dashboard", { state: { profile: user.profile || profile } }); 
       return; 

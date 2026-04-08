@@ -57,6 +57,7 @@ export default function AdminPage() {
   const [deleting, setDeleting] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
+  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1 });
 
   // Redirect non-admin users
   useEffect(() => {
@@ -70,7 +71,7 @@ export default function AdminPage() {
     if (!isLoggedIn || user?.role !== "admin") return;
     setLoadingData(true);
     const fetches = [];
-    if (tab === "overview" || tab === "users" || tab === "diets") fetches.push(fetchUsers());
+    if (tab === "overview" || tab === "users" || tab === "diets") fetches.push(fetchUsers(1));
     if (tab === "overview" || tab === "analytics") fetches.push(fetchAnalytics());
     Promise.allSettled(fetches).finally(() => setLoadingData(false));
   }, [tab, isLoggedIn, user]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -82,9 +83,13 @@ export default function AdminPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const fetchUsers = () => {
-    return api.get("/api/admin/users")
-      .then((res) => { setStats(res.data.stats); setUsers(res.data.users); })
+  const fetchUsers = (page = 1) => {
+    return api.get(`/api/admin/users?page=${page}`)
+      .then((res) => { 
+        setStats(res.data.stats); 
+        setUsers(res.data.users); 
+        setPagination(res.data.pagination || { currentPage: 1, totalPages: 1 });
+      })
       .catch(() => showToast("Failed to load users", "error"));
   };
 
@@ -95,10 +100,13 @@ export default function AdminPage() {
   };
 
 
-  const handleSearch = () => {
+  const handleSearch = (page = 1) => {
     if (!search.trim()) { setSearchResults(null); return; }
-    api.get(`/api/admin/users/search?query=${encodeURIComponent(search.trim())}`)
-      .then((res) => setSearchResults(res.data.results))
+    api.get(`/api/admin/users/search?query=${encodeURIComponent(search.trim())}&page=${page}`)
+      .then((res) => {
+        setSearchResults(res.data.results);
+        setPagination(res.data.pagination || { currentPage: 1, totalPages: 1 });
+      })
       .catch(() => showToast("Search failed", "error"));
   };
 
@@ -158,6 +166,40 @@ export default function AdminPage() {
       <p>Loading data...</p>
     </div>
   );
+
+  const PaginationControls = () => {
+    if (!pagination || pagination.totalPages <= 1) return null;
+    const isSearch = Boolean(searchResults);
+    const onPageChange = (p) => {
+      if (isSearch) handleSearch(p);
+      else fetchUsers(p);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    return (
+      <div className="admin-pagination">
+        <button
+          className="admin-btn admin-btn--ghost admin-btn--sm"
+          disabled={pagination.currentPage <= 1}
+          onClick={() => onPageChange(pagination.currentPage - 1)}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+          Prev
+        </button>
+        <span className="admin-page-info">
+          Page <strong>{pagination.currentPage}</strong> of {pagination.totalPages}
+        </span>
+        <button
+          className="admin-btn admin-btn--ghost admin-btn--sm"
+          disabled={pagination.currentPage >= pagination.totalPages}
+          onClick={() => onPageChange(pagination.currentPage + 1)}
+        >
+          Next
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+        </button>
+      </div>
+    );
+  };
 
   return (
     <main className="app-shell app-shell--admin" aria-label="Admin panel">
@@ -274,7 +316,7 @@ export default function AdminPage() {
                           <tr key={u._id}>
                             <td className="admin-cell-email">
                               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                <div className="admin-avatar admin-avatar--sm" style={{ width: 28, height: 28, fontSize: "12px" }}>
+                                <div className="admin-avatar admin-avatar--sm">
                                   {(u.email || "?")[0].toUpperCase()}
                                 </div>
                                 <span>{u.email}</span>
@@ -299,6 +341,30 @@ export default function AdminPage() {
                       </tbody>
                     </table>
                   </div>
+
+                  {/* Mobile version for Recent Signups */}
+                  <div className="admin-card-list">
+                    {users.slice(0, 5).map((u) => (
+                      <div className="admin-user-card" key={u._id}>
+                        <div className="admin-user-card-header">
+                          <div className="admin-avatar admin-avatar--sm">{(u.email || "?")[0].toUpperCase()}</div>
+                          <div className="admin-user-card-info">
+                            <strong className="admin-user-card-email">{u.email}</strong>
+                            <span className="admin-user-card-meta">Joined {formatDate(u.createdAt)}</span>
+                          </div>
+                        </div>
+                        <div className="admin-user-card-tags">
+                          <span className={`admin-badge ${u.onboardingComplete ? "admin-badge--yes" : "admin-badge--no"}`}>
+                            {u.onboardingComplete ? "Onboarded" : "Pending"}
+                          </span>
+                        </div>
+                        <div className="admin-user-card-actions">
+                          <button className="admin-btn admin-btn--ghost admin-btn--sm" onClick={() => { setTab("users"); setSelectedUser(u); }}>View</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
                 </div>
               )}
             </div>
@@ -423,6 +489,8 @@ export default function AdminPage() {
                   <p className="admin-empty">No users found</p>
                 )}
               </div>
+
+              <PaginationControls />
 
               {searchResults && (
                 <button className="admin-btn admin-btn--ghost" style={{ marginTop: 12 }} onClick={() => { setSearch(""); setSearchResults(null); }}>
@@ -567,6 +635,7 @@ export default function AdminPage() {
                 ))}
                 {users.length === 0 && <p className="admin-empty">No users found</p>}
               </div>
+              <PaginationControls />
             </div>
           )}
 

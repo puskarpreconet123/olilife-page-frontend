@@ -21,7 +21,7 @@ const DEFAULT_PROFILE = {
 };
 
 export default function DashboardPage() {
-  const { isLoggedIn, logout, refreshUser } = useAuth();
+  const { user, isLoggedIn, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   useScrollReveal();
@@ -32,6 +32,14 @@ export default function DashboardPage() {
   const [loaded, setLoaded] = useState(Boolean(location.state?.profile));
   const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
+
+  // Guard: Redirect admins to admin panel
+  useEffect(() => {
+    if (isLoggedIn && user?.role === "admin") {
+      navigate("/admin", { replace: true });
+    }
+  }, [isLoggedIn, user, navigate]);
+
   // Load profile + saved diet plan from DB on mount
   useEffect(() => {
     if (!isLoggedIn) { setLoaded(true); return; }

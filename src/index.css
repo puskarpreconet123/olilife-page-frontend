@@ -2155,11 +2155,12 @@ button {
 }
 
 .admin-sidebar-footer {
-  padding-top: 20px;
+  padding: 20px 0 32px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-top: auto;
 }
 
 .admin-user-info {
@@ -2173,14 +2174,19 @@ button {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(27, 94, 32, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--white);
+  color: var(--green-900);
   flex-shrink: 0;
+}
+
+.admin-sidebar .admin-avatar {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--white);
 }
 
 .admin-avatar--sm {
@@ -2803,10 +2809,13 @@ button {
     bottom: 0;
     width: 280px;
     min-width: 280px;
-    height: 100vh;
+    height: 100%;
+    height: 100dvh;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
   }
 
   .admin-sidebar--open {
