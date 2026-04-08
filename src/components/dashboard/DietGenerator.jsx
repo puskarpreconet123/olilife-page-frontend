@@ -202,11 +202,14 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
               style={{ marginBottom: "32px" }}
             >
               <div className="meal-top">
-                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                  <span className="meal-badge">{icon}</span>
+                <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
+                  <span className="meal-badge" style={{ marginTop: "2px" }}>{icon}</span>
                   <div>
-                    <h4 style={{ fontSize: "1.1rem", fontWeight: "800" }}>{meal.label}</h4>
-                    <div className="meal-target">Target {meal.targetCalories} kcal | Actual {mealTotals.calories} kcal</div>
+                    <h4>{meal.label}</h4>
+                    <div className="meal-target">
+                      Target {meal.targetCalories} kcal <br className="mobile-only" />
+                      | Actual {mealTotals.calories} kcal
+                    </div>
                   </div>
                 </div>
                 <button className="meal-action" type="button" onClick={() => openMealSheet(mealIndex)}>Replace</button>
@@ -222,10 +225,12 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
                   >
                     <div className="food-main">
                       <span className={`food-category-tag ${item.category.toLowerCase()}`}>{item.category}</span>
-                      <strong style={{ display: "block", marginBottom: "2px" }}>{item.name}</strong>
-                      <span style={{ fontSize: "0.8rem" }}>{item.portionFactor.toFixed(1)}x serving | {roundOne(item.protein)}P / {roundOne(item.carbs)}C / {roundOne(item.fats)}F</span>
+                      <strong className="food-name">{item.name}</strong>
+                      <span className="food-details">
+                        {item.portionFactor.toFixed(1)}x serving • {roundOne(item.protein)}P / {roundOne(item.carbs)}C / {roundOne(item.fats)}F
+                      </span>
                     </div>
-                    <div className="food-calories">{item.calories} kcal</div>
+                    <div className="food-calories">{item.calories} <small style={{ fontSize: "0.65rem", display: "block", fontWeight: "600", opacity: 0.6 }}>kcal</small></div>
                   </button>
                 ))}
               </div>
