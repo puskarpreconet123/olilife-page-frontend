@@ -26,11 +26,11 @@ export default function DashboardPage() {
   const location = useLocation();
   useScrollReveal();
 
-  const [profile, setProfile]       = useState(location.state?.profile || DEFAULT_PROFILE);
-  const [savedDiet, setSavedDiet]   = useState(null);
-  const [modal, setModal]           = useState(null);
-  const [loaded, setLoaded]         = useState(Boolean(location.state?.profile));
-  const [saving, setSaving]         = useState(false);
+  const [profile, setProfile] = useState(location.state?.profile || DEFAULT_PROFILE);
+  const [savedDiet, setSavedDiet] = useState(null);
+  const [modal, setModal] = useState(null);
+  const [loaded, setLoaded] = useState(Boolean(location.state?.profile));
+  const [saving, setSaving] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   // Load profile + saved diet plan from DB on mount
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function DashboardPage() {
       try {
         await api.put("/api/user/profile", { profile, onboardingComplete: true });
         if (refreshUser) refreshUser();
-      } catch (err) {}
+      } catch (err) { }
       showToast("Account created and profile saved!");
     } else {
       showToast("Logged in! Your previous diet plan has been restored.");
@@ -99,7 +99,7 @@ export default function DashboardPage() {
           setSavedDiet(res.data.savedDietPlan);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   const handleLogout = async () => {
@@ -238,7 +238,7 @@ export default function DashboardPage() {
             <div className="dashboard-col">
 
               {/* Diet generator */}
-              <section className="panel-card section-card" id="diet-section">
+              <section className="panel-card section-card reveal-right" id="diet-section">
                 <div className="section-head">
                   <div>
                     <h3>Diet Generator</h3>
