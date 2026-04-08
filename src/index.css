@@ -24,9 +24,6 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  width: 100%;
-  overflow-x: hidden;
-  position: relative;
   font-family: "Poppins", "Inter", "Segoe UI", Arial, sans-serif;
   background: radial-gradient(circle at top, rgba(76, 175, 80, 0.2), transparent 36%),
     linear-gradient(180deg, #fbf9ed 0%, #f5f5dc 52%, #efe8cc 100%);
@@ -59,14 +56,6 @@ button {
   box-shadow: var(--shadow-soft);
   overflow: hidden;
   backdrop-filter: blur(14px);
-}
-
-@media (max-width: 480px) {
-  .app-shell {
-    border-radius: 28px;
-    width: calc(100% - 12px); /* Safety gutter for shadows and edges */
-    margin: 4px auto;
-  }
 }
 
 .app-shell::before {
@@ -496,7 +485,34 @@ button {
   padding: 14px 12px;
   text-align: center;
 }
+/* ── Fix 2: Prevent flex/grid children from overflowing their containers ── */
+.food-swap,
+.meal-top,
+.brand-row,
+.summary-row,
+.sheet-head,
+.sheet-option-top {
+  min-width: 0;
+}
 
+.food-main,
+.sheet-head-text,
+.admin-cell-email {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Fix grid children overflow */
+.stats-grid ,
+.dashboard-columns,
+.dashboard-content,
+.meal-list,
+.food-list,
+.field-group,
+.option-grid,
+.macro-stack {
+  min-width: 0;
+}
 .option-card,
 .condition-card {
   display: flex;
@@ -796,11 +812,9 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow: 0 12px 34px rgba(62, 39, 35, 0.1);
   backdrop-filter: blur(12px);
-  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
 }
 
 .meal-card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 20px 48px rgba(62, 39, 35, 0.14);
 }
 
@@ -968,7 +982,6 @@ button {
 
 .meal-macro-segment {
   height: 100%;
-  transition: width 0.5s ease;
 }
 
 .meal-macro-segment.protein {
@@ -1603,7 +1616,43 @@ button {
 
   html,
   body {
+    padding: 0;
+  }
+    .app-inner {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  /* Ensure content doesn't exceed viewport width */
+  .app-shell {
     overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0; /* Full width on very small screens feels more native */
+  }
+
+  /* Make grids responsive */
+  .dashboard-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .diet-summary,
+  .diet-toolbar,
+  .dashboard-actions,
+  .footer-actions {
+    grid-template-columns: 1fr;
+  }
+
+  /* Prevent wide content from overflowing */
+  .sheet,
+  .modal-box,
+  .toast {
+    max-width: calc(100vw - 32px);
   }
 }
 
@@ -1752,6 +1801,23 @@ button {
   .mobile-only {
     display: block;
   }
+    .meal-action {
+    white-space: normal;
+    flex-shrink: 1;
+    font-size: 0.76rem;
+    padding: 7px 10px;
+  }
+    .food-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Cap food-swap so it never exceeds card width */
+  .food-swap {
+    max-width: 100%;
+    overflow: hidden;
+  }
 }
 
 /* ── Large desktop 1280px+ ─────────────────────────────── */
@@ -1770,14 +1836,11 @@ button {
   }
 }
 
-.dashboard-actions {
-  margin-top: 10px;
-}
+.dashboard-actions{margin-top: 10px;}  
 
-/* ── Mobile/Tablet Stacking ─────────────────────────── */
-@media (max-width: 1023px) {
-  .dashboard-columns,
-  .dashboard-content,
+/* ── Small mobile <360px ───────────────────────────────── */
+@media (max-width: 360px) {
+
   .choice-grid,
   .segment-grid,
   .option-grid,
@@ -1786,30 +1849,13 @@ button {
   .dashboard-actions,
   .diet-toolbar,
   .footer-actions {
-    grid-template-columns: 1fr !important;
-  }
-
-  .dashboard-col {
-    gap: 12px;
-    width: 100%;
-    min-width: 0;
-  }
-
-  .diet-summary-card,
-  .stat-card {
-    width: 100% !important;
-    min-width: 0 !important;
+    grid-template-columns: 1fr;
   }
 
   .option-card.wide,
   .condition-card.wide {
     grid-column: auto;
   }
-}
-
-/* ── Small mobile specific tweaks ──────────────────── */
-@media (max-width: 380px) {
-  /* Meal Card Mobile Optimizations */
 
   /* Meal Card Mobile Optimizations */
   .meal-card {
@@ -1860,13 +1906,8 @@ button {
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* ── Scroll Reveal Animations ───────────────────────────────────────────────── */
@@ -1880,11 +1921,7 @@ button {
     transform 0.78s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform, opacity;
 }
-
-.reveal.revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
+.reveal.revealed { opacity: 1; transform: translateY(0); }
 
 /* Slide in from left */
 .reveal-left {
@@ -1895,11 +1932,7 @@ button {
     transform 0.78s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform, opacity;
 }
-
-.reveal-left.revealed {
-  opacity: 1;
-  transform: translateX(0);
-}
+.reveal-left.revealed { opacity: 1; transform: translateX(0); }
 
 /* Slide in from right */
 .reveal-right {
@@ -1910,11 +1943,7 @@ button {
     transform 0.78s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform, opacity;
 }
-
-.reveal-right.revealed {
-  opacity: 1;
-  transform: translateX(0);
-}
+.reveal-right.revealed { opacity: 1; transform: translateX(0); }
 
 /* Scale + fade pop */
 .reveal-pop {
@@ -1925,44 +1954,19 @@ button {
     transform 0.68s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform, opacity;
 }
-
-.reveal-pop.revealed {
-  opacity: 1;
-  transform: scale(1);
-}
+.reveal-pop.revealed { opacity: 1; transform: scale(1); }
 
 /* Stagger delays */
-.stagger-1 {
-  transition-delay: 60ms;
-}
-
-.stagger-2 {
-  transition-delay: 130ms;
-}
-
-.stagger-3 {
-  transition-delay: 200ms;
-}
-
-.stagger-4 {
-  transition-delay: 270ms;
-}
-
-.stagger-5 {
-  transition-delay: 340ms;
-}
-
-.stagger-6 {
-  transition-delay: 410ms;
-}
+.stagger-1 { transition-delay: 60ms;  }
+.stagger-2 { transition-delay: 130ms; }
+.stagger-3 { transition-delay: 200ms; }
+.stagger-4 { transition-delay: 270ms; }
+.stagger-5 { transition-delay: 340ms; }
+.stagger-6 { transition-delay: 410ms; }
 
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
-
-  .reveal,
-  .reveal-left,
-  .reveal-right,
-  .reveal-pop {
+  .reveal, .reveal-left, .reveal-right, .reveal-pop {
     opacity: 1;
     transform: none;
     transition: none;
@@ -1995,15 +1999,8 @@ button {
 
 /* ── Fade-in animation ───────────────────────────────── */
 @keyframes adminFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .admin-fade-in {
@@ -2059,17 +2056,9 @@ button {
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
-.admin-hamburger-line.open:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
-}
-
-.admin-hamburger-line.open:nth-child(2) {
-  opacity: 0;
-}
-
-.admin-hamburger-line.open:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
-}
+.admin-hamburger-line.open:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.admin-hamburger-line.open:nth-child(2) { opacity: 0; }
+.admin-hamburger-line.open:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 /* ── Overlay ─────────────────────────────────────────── */
 .admin-overlay {
@@ -2377,21 +2366,10 @@ button {
   height: 3px;
 }
 
-.admin-stat-card--primary::after {
-  background: linear-gradient(90deg, var(--green-900), var(--green-500));
-}
-
-.admin-stat-card--success::after {
-  background: linear-gradient(90deg, #2e7d32, #66bb6a);
-}
-
-.admin-stat-card--warning::after {
-  background: linear-gradient(90deg, #e65100, #ff9800);
-}
-
-.admin-stat-card--info::after {
-  background: linear-gradient(90deg, #1565c0, #42a5f5);
-}
+.admin-stat-card--primary::after { background: linear-gradient(90deg, var(--green-900), var(--green-500)); }
+.admin-stat-card--success::after { background: linear-gradient(90deg, #2e7d32, #66bb6a); }
+.admin-stat-card--warning::after { background: linear-gradient(90deg, #e65100, #ff9800); }
+.admin-stat-card--info::after { background: linear-gradient(90deg, #1565c0, #42a5f5); }
 
 .admin-stat-icon {
   width: 40px;
@@ -2403,25 +2381,10 @@ button {
   margin-bottom: 4px;
 }
 
-.admin-stat-card--primary .admin-stat-icon {
-  background: rgba(27, 94, 32, 0.08);
-  color: var(--green-900);
-}
-
-.admin-stat-card--success .admin-stat-icon {
-  background: rgba(46, 125, 50, 0.08);
-  color: #2e7d32;
-}
-
-.admin-stat-card--warning .admin-stat-icon {
-  background: rgba(230, 81, 0, 0.08);
-  color: #e65100;
-}
-
-.admin-stat-card--info .admin-stat-icon {
-  background: rgba(21, 101, 192, 0.08);
-  color: #1565c0;
-}
+.admin-stat-card--primary .admin-stat-icon { background: rgba(27, 94, 32, 0.08); color: var(--green-900); }
+.admin-stat-card--success .admin-stat-icon { background: rgba(46, 125, 50, 0.08); color: #2e7d32; }
+.admin-stat-card--warning .admin-stat-icon { background: rgba(230, 81, 0, 0.08); color: #e65100; }
+.admin-stat-card--info .admin-stat-icon { background: rgba(21, 101, 192, 0.08); color: #1565c0; }
 
 .admin-stat-label {
   font-size: 0.76rem;
@@ -2796,9 +2759,7 @@ button {
 }
 
 @keyframes adminSpin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 .admin-spinner {

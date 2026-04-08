@@ -238,7 +238,7 @@ export default function DashboardPage() {
             <div className="dashboard-col">
 
               {/* Diet generator */}
-              <section className="panel-card section-card reveal-right" id="diet-section">
+              <section className="panel-card section-card" id="diet-section">
                 <div className="section-head">
                   <div>
                     <h3>Diet Generator</h3>
