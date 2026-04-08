@@ -148,6 +148,11 @@ export default function OnboardingPage() {
 
   const handleLoginSuccess = (u) => {
     setModal(null);
+    if (u?.role === "admin") {
+      showToast("Welcome back, Admin!");
+      navigate("/admin");
+      return;
+    }
     showToast("Welcome back!");
     if (u?.onboardingComplete || isProfileComplete(u?.profile)) {
       if (!u?.onboardingComplete) {

@@ -31,6 +31,7 @@ export default function DashboardPage() {
   const [modal, setModal]           = useState(null);
   const [loaded, setLoaded]         = useState(Boolean(location.state?.profile));
   const [saving, setSaving]         = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
   // Load profile + saved diet plan from DB on mount
   useEffect(() => {
     if (!isLoggedIn) { setLoaded(true); return; }
@@ -71,6 +72,10 @@ export default function DashboardPage() {
 
   const handleLoginSuccess = async (u) => {
     setModal(null);
+    if (u?.role === "admin") {
+      navigate("/admin");
+      return;
+    }
     if (modal === "signup") {
       try {
         await api.put("/api/user/profile", { profile, onboardingComplete: true });
@@ -100,6 +105,22 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     await logout();
     navigate("/");
+  };
+
+  const handleSendEmail = () => {
+    if (!isLoggedIn) {
+      setModal("login");
+      return;
+    }
+    setSendingEmail(true);
+    api.post("/api/user/send-diet-email")
+      .then(() => {
+        showToast("Diet chart sent to your email!", "success");
+      })
+      .catch((err) => {
+        showToast(err.response?.data?.message || "Failed to send email.", "error");
+      })
+      .finally(() => setSendingEmail(false));
   };
 
   if (!loaded) {
@@ -138,9 +159,26 @@ export default function DashboardPage() {
             <h2>Personalized wellness overview.</h2>
             <p>Your body metrics, health conditions, diet plan, and product recommendations update together as you edit your constraints.</p>
             <div className="dashboard-actions">
-              <button className="btn btn-secondary" type="button" onClick={() => navigate("/", { state: { fromDashboard: true } })}>Back to Onboarding</button>
+              {isLoggedIn ? (
+                <button
+                  className="btn btn-secondary"
+                  type="button"
+                  onClick={handleSendEmail}
+                  disabled={sendingEmail}
+                >
+                  {sendingEmail ? "Sending..." : "Send via Email"}
+                </button>
+              ) : (
+                <button
+                  className="btn btn-secondary"
+                  type="button"
+                  onClick={() => navigate("/", { state: { fromDashboard: true } })}
+                >
+                  Back to Onboarding
+                </button>
+              )}
               <button
-                className="btn btn-subtle"
+                className="btn btn-primary"
                 type="button"
                 onClick={() => document.getElementById("diet-section")?.scrollIntoView({ behavior: "smooth" })}
               >
@@ -188,6 +226,12 @@ export default function DashboardPage() {
                 <TipsList state={profile} />
               </section>
 
+              {/* Products */}
+              <section className="panel-card section-card reveal-pop stagger-2">
+                <div className="section-head"><div><h3>Product Recommendations</h3><p>Most relevant Olilife suggestions based on your conditions.</p></div></div>
+                <ProductSection state={profile} savedDiet={savedDiet} />
+              </section>
+
             </div>
 
             {/* Right column — diet & products */}
@@ -207,12 +251,6 @@ export default function DashboardPage() {
                   onRequestAuth={() => setModal("login")}
                   onDietSaved={handleDietSaved}
                 />
-              </section>
-
-              {/* Products */}
-              <section className="panel-card section-card reveal-pop stagger-2">
-                <div className="section-head"><div><h3>Product Recommendations</h3><p>Most relevant Olilife suggestions based on your conditions.</p></div></div>
-                <ProductSection state={profile} savedDiet={savedDiet} />
               </section>
 
             </div>

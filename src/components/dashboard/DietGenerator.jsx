@@ -6,6 +6,7 @@ import {
 import BottomSheet from "../shared/BottomSheet";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../utils/api";
+import { showToast } from "../shared/Toast";
 
 function formatDate(iso) {
   if (!iso) return "";
@@ -198,11 +199,7 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
             <div
               key={mealIndex}
               className="meal-card"
-              style={{
-                animation: `slideUpFadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards ${mealIndex * 0.15}s`,
-                opacity: 0,
-                marginBottom: "32px"
-              }}
+              style={{ marginBottom: "32px" }}
             >
               <div className="meal-top">
                 <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>

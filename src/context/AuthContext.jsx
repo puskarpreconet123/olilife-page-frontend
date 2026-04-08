@@ -20,6 +20,7 @@ export function AuthProvider({ children }) {
 
   const verifyOtp = async (email, otp) => {
     const res = await api.post("/api/auth/verify-otp", { email, otp });
+    if (res.data.token) localStorage.setItem("token", res.data.token);
     setUser(res.data.user);
     return res.data.user;
   };
