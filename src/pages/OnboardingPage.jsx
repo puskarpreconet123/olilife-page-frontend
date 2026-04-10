@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../utils/api";
 import ProgressBar from "../components/shared/ProgressBar";
+import ProductCarousel from "../components/shared/ProductCarousel";
 import WelcomeScreen from "../components/screens/WelcomeScreen";
 import AgeGenderScreen from "../components/screens/AgeGenderScreen";
 import HeightScreen from "../components/screens/HeightScreen";
@@ -18,8 +19,8 @@ const TOTAL_SCREENS = 7; // 0-6, dashboard is /dashboard route
 
 const DEFAULT_STATE = {
   age: "", gender: "", height: "", heightUnit: "cm", weight: "",
-  activityLevel: "", goal: "", diabeticStatus: "", hasAllergies: false,
-  allergyList: [], customAllergy: "", chronicConditions: []
+  activityLevel: "", goal: "", dietPreference: "veg", diabeticStatus: "",
+  hasAllergies: false, allergyList: [], customAllergy: "", chronicConditions: []
 };
 
 function isAgeGenderComplete(s) {
@@ -181,7 +182,6 @@ export default function OnboardingPage() {
 
   return (
     <main className="app-shell app-shell--onboarding" aria-label="Olilife onboarding app">
-      <div className="status-bar" aria-hidden="true" />
       <div className="app-inner">
         <ProgressBar
           current={screen}
@@ -192,6 +192,7 @@ export default function OnboardingPage() {
             </button>
           )}
         />
+        {screen > 0 && <ProductCarousel variant="slim" />}
         <section className="screen-frame">
           {screen === 0 && (
             <WelcomeScreen

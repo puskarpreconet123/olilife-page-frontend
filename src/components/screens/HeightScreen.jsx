@@ -5,10 +5,7 @@ export default function HeightScreen({ state, onChange, onNext, onBack, canAdvan
 
   return (
     <article className="screen active" aria-labelledby="heightTitle">
-      <div className="panel-card">
-        <h2 className="panel-title" id="heightTitle">What is your height?</h2>
-        <p className="panel-copy">We support centimeters and feet so the flow feels natural for you.</p>
-      </div>
+      <h2 className="panel-title" id="heightTitle" style={{ marginBottom: "8px" }}>What is your height?</h2>
       <div className="panel-card field-group">
         <div className="field-label">Preferred unit</div>
         <div className="segment-grid" role="group" aria-label="Choose your height unit">

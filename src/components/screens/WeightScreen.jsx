@@ -4,10 +4,7 @@ export default function WeightScreen({ state, onChange, onNext, onBack, canAdvan
   const [weightError, setWeightError] = useState("");
   return (
     <article className="screen active" aria-labelledby="weightTitle">
-      <div className="panel-card">
-        <h2 className="panel-title" id="weightTitle">And your weight?</h2>
-        <p className="panel-copy">We use your current weight as one of the anchors for goal-based guidance.</p>
-      </div>
+      <h2 className="panel-title" id="weightTitle" style={{ marginBottom: "8px" }}>And your weight?</h2>
       <div className="panel-card field-group">
         <label className="field-label" htmlFor="weightInput">Weight</label>
         <div className="input-shell with-suffix">

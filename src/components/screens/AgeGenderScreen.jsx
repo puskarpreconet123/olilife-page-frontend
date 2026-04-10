@@ -6,10 +6,7 @@ export default function AgeGenderScreen({ state, onChange, onNext, onBack, canAd
   const [ageError, setAgeError] = useState("");
   return (
     <article className="screen active" aria-labelledby="ageGenderTitle">
-      <div className="panel-card">
-        <h2 className="panel-title" id="ageGenderTitle">Tell us a little about you.</h2>
-        <p className="panel-copy">Your age and gender help us frame a more tailored wellness recommendation.</p>
-      </div>
+      <h2 className="panel-title" id="ageGenderTitle" style={{ marginBottom: "8px" }}>Tell us a little about you.</h2>
       <div className="panel-card field-group">
         <label className="field-label" htmlFor="ageInput">Age</label>
         <div className="input-shell">
@@ -52,9 +49,27 @@ export default function AgeGenderScreen({ state, onChange, onNext, onBack, canAd
           ))}
         </div>
       </div>
+      <div className="panel-card field-group">
+        <div className="field-label">Diet Preference</div>
+        <div className="choice-grid" role="group" aria-label="Select your diet preference">
+          {[ 
+            { key: "veg", label: "Vegetarian" }, 
+            { key: "non-veg", label: "Non-Veg" } 
+          ].map((p) => (
+            <button
+              key={p.key}
+              className={`choice-button${state.dietPreference === p.key ? " selected" : ""}`}
+              type="button"
+              onClick={() => onChange("dietPreference", p.key)}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="insight-strip">
         <strong>Why this matters:</strong>{" "}
-        Small profile details help us calibrate your later wellness recommendations with more care.
+        Personal details and preferences help us calibrate your plan with more care.
       </div>
       <div className="footer-actions">
         <button className="btn btn-secondary" type="button" onClick={onBack}>Back</button>

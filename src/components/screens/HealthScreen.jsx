@@ -39,10 +39,7 @@ export default function HealthScreen({ state, onChange, onNext, onBack, canAdvan
 
   return (
     <article className="screen active" aria-labelledby="healthTitle">
-      <div className="panel-card">
-        <h2 className="panel-title" id="healthTitle">Any health conditions we should note?</h2>
-        <p className="panel-copy">This keeps your wellness plan more mindful, safer around sensitivities, and better tailored to long-term needs.</p>
-      </div>
+      <h2 className="panel-title" id="healthTitle" style={{ marginBottom: "8px" }}>Any health conditions we should note?</h2>
 
       <div className="panel-card field-group">
         <div className="field-label">Diabetic status</div>

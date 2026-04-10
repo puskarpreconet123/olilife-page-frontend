@@ -11,10 +11,7 @@ const GOALS = [
 export default function GoalScreen({ state, onChange, onNext, onBack, canAdvance }) {
   return (
     <article className="screen active" aria-labelledby="goalTitle">
-      <div className="panel-card">
-        <h2 className="panel-title" id="goalTitle">What is your current goal?</h2>
-        <p className="panel-copy">Pick the outcome that matters most right now so we can shape the plan around it.</p>
-      </div>
+      <h2 className="panel-title" id="goalTitle" style={{ marginBottom: "8px" }}>What is your current goal?</h2>
       <div className="panel-card field-group">
         <div className="field-label">Primary goal</div>
         <div className="option-grid" role="group" aria-label="Select your goal">

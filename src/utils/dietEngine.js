@@ -1,22 +1,23 @@
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 export const MEAL_CONFIGS = [
-  { key: "breakfast", label: "Breakfast", percentage: 0.25 },
-  { key: "lunch",     label: "Lunch",     percentage: 0.30 },
-  { key: "snacks",    label: "Snacks",    percentage: 0.15 },
+  { key: "breakfast", label: "Breakfast", percentage: 0.30 },
+  { key: "lunch",     label: "Lunch",     percentage: 0.35 },
   { key: "dinner",    label: "Dinner",    percentage: 0.25 },
-  { key: "dessert",   label: "Dessert",   percentage: 0.05 }
+  { key: "snacks",    label: "Snacks",    percentage: 0.10 },
+  { key: "dessert",   label: "Dessert",   percentage: 0.05 } // Percentage of base C
 ];
 
 export const ACTIVITY_MULTIPLIERS = {
-  sedentary: 1.2,
-  light:     1.375,
-  moderate:  1.55,
-  active:    1.725
+  sedentary:   1.2,
+  light:       1.375,
+  moderate:    1.55,
+  very_active: 1.725,
+  athlete:     1.9
 };
 
 export const GOAL_ADJUSTMENTS = {
-  "weight-loss": -500,
+  "weight-loss": -400,
   "weight-gain":  400,
   maintain:         0,
   detox:         -200,
@@ -40,115 +41,456 @@ export const CONDITION_PREFERENCES = {
   digestive:  { support: ["easy-digest"],                            avoid: ["fried", "heavy"] }
 };
 
-// [name, calories, protein, carbs, fats, mealTypes, tags]
-const FOOD_SEEDS = {
-  protein: [
-    ["Moong Dal Chilla",   118, 10, 14, 3, "breakfast|lunch|dinner", "veg|diabetic-friendly|low-fat|easy-digest|detox-friendly"],
-    ["Besan Chilla",       124,  8, 14, 4, "breakfast|snacks|dinner", "veg|easy-digest|low-fat"],
-    ["Paneer Bhurji",      138, 13,  5, 7, "breakfast|lunch|dinner",  "veg|dairy|balanced-energy|protein-heavy"],
-    ["Sprouts Chaat",       98,  8, 12, 2, "breakfast|snacks|lunch",  "veg|diabetic-friendly|low-fat|easy-digest|detox-friendly"],
-    ["Greek Yogurt Bowl",   92, 10,  5, 3, "breakfast|snacks|dessert","veg|dairy|diabetic-friendly|low-fat|easy-digest"],
-    ["Egg White Bhurji",    92, 13,  2, 3, "breakfast|lunch|dinner",  "nonveg|eggs|diabetic-friendly|low-fat|protein-heavy"],
-    ["Boiled Eggs",         96,  8,  1, 6, "breakfast|snacks|lunch",  "nonveg|eggs|balanced-energy"],
-    ["Tofu Scramble",      104, 11,  4, 5, "breakfast|lunch|dinner",  "veg|soy|diabetic-friendly|low-fat|balanced-iodine"],
-    ["Grilled Chicken Tikka",148,20, 3, 6, "lunch|dinner|snacks",    "nonveg|low-fat|protein-heavy|low-sodium"],
-    ["Chicken Curry",      158, 18,  5, 7, "lunch|dinner",            "nonveg|balanced-energy|protein-heavy"],
-    ["Fish Curry",         152, 19,  4, 6, "lunch|dinner",            "nonveg|seafood|anti-inflammatory|low-fat"],
-    ["Dal Tadka",          128,  9, 16, 3, "lunch|dinner",            "veg|diabetic-friendly|low-fat|easy-digest"],
-    ["Rajma Bowl",         138,  9, 18, 4, "lunch|dinner",            "veg|balanced-energy|protein-heavy"],
-    ["Kala Chana Bowl",    132, 10, 17, 3, "lunch|snacks|dinner",     "veg|diabetic-friendly|low-fat"],
-    ["Sambar",              96,  6, 12, 2, "breakfast|lunch|dinner",  "veg|easy-digest|low-fat|detox-friendly"],
-    ["Roasted Chana",       78,  5, 11, 1, "snacks|dessert|lunch",    "veg|diabetic-friendly|low-fat"],
-    ["Soya Chunk Masala",   146, 19,  8, 4, "lunch|dinner|snacks",     "veg|soy|protein-heavy|balanced-energy"],
-    ["Hung Curd Mousse",    54,  6,  4, 1, "dessert|snacks|breakfast","veg|dairy|low-fat|easy-digest"],
-    ["Paneer Tikka",       142, 14,  4, 7, "lunch|dinner|snacks",     "veg|dairy|balanced-energy|protein-heavy"],
-    ["Lentil Soup",         88,  7, 11, 2, "lunch|dinner|snacks",     "veg|easy-digest|detox-friendly|low-fat"]
-  ],
-  carb: [
-    ["Poha",               124, 3, 23, 2, "breakfast|snacks",         "veg|easy-digest"],
-    ["Vegetable Upma",     118, 3, 20, 3, "breakfast|snacks",         "veg|easy-digest"],
-    ["Oats Porridge",      110, 4, 18, 2, "breakfast|dessert|snacks", "veg|diabetic-friendly|low-gi|easy-digest"],
-    ["Idli",                84, 3, 16, 0.5,"breakfast|snacks",        "veg|easy-digest"],
-    ["Dosa",               112, 3, 18, 3, "breakfast|dinner",         "veg|easy-digest"],
-    ["Multigrain Roti",    102, 3, 18, 2, "lunch|dinner",             "veg|gluten|balanced-energy"],
-    ["Brown Rice",         118, 3, 24, 1, "lunch|dinner",             "veg|diabetic-friendly|low-gi"],
-    ["Red Rice",           116, 3, 24, 1, "lunch|dinner",             "veg|low-gi"],
-    ["Quinoa Pulao",       126, 4, 22, 2, "lunch|dinner",             "veg|diabetic-friendly|balanced-energy|low-gi"],
-    ["Millet Khichdi",     114, 4, 19, 2, "breakfast|lunch|dinner",   "veg|easy-digest|detox-friendly"],
-    ["Sweet Potato Chaat", 106, 2, 24, 0.4,"breakfast|snacks|dinner", "veg|low-gi|balanced-energy"],
-    ["Apple Cinnamon Bowl", 74, 0.5,18, 0.2,"breakfast|snacks|dessert","veg|easy-digest|diabetic-friendly|low-gi"],
-    ["Papaya Bowl",         54, 0.7,13, 0.2,"breakfast|snacks|dessert","veg|easy-digest|detox-friendly"],
-    ["Guava Slices",        56, 1, 12, 0.4,"snacks|dessert",          "veg|diabetic-friendly|low-gi"],
-    ["Fruit Chaat",         68, 1, 16, 0.3,"snacks|dessert",          "veg|high-sugar|easy-digest"],
-    ["Barley Khichdi",     112, 4, 21, 1, "lunch|dinner",             "veg|diabetic-friendly|low-gi|easy-digest"],
-    ["Oats Idli",           88, 4, 15, 1, "breakfast|snacks",         "veg|diabetic-friendly|easy-digest"],
-    ["Vegetable Dalia",    116, 4, 20, 2, "breakfast|dinner",         "veg|gluten|easy-digest"],
-    ["Steamed Corn",        96, 3, 19, 1, "lunch|snacks",             "veg|balanced-energy"],
-    ["Baked Apple",         48, 0.3,11, 0.1,"dessert|breakfast",      "veg|easy-digest|diabetic-friendly"],
-    ["Beetroot Rice",      124, 3, 24, 2, "lunch|dinner",             "veg|balanced-energy|detox-friendly"]
-  ],
-  fat: [
-    ["Almonds",             42, 1.5, 1.6, 3.6,"breakfast|snacks|dessert","veg|nuts|low-gi|balanced-energy"],
-    ["Walnuts",             46, 1.1, 0.9, 4.4,"breakfast|snacks|dessert","veg|nuts|anti-inflammatory"],
-    ["Peanuts",             48, 2,   1.8, 3.8,"breakfast|snacks|lunch",  "veg|nuts|balanced-energy"],
-    ["Peanut Chutney",      54, 2,   2,   4.5,"breakfast|lunch|dinner",  "veg|nuts|balanced-energy"],
-    ["Coconut Chutney",     44, 1,   2.5, 3.5,"breakfast|dinner",        "veg|easy-digest"],
-    ["Flaxseed Mix",        40, 1.4, 2,   3,  "breakfast|snacks|dessert","veg|anti-inflammatory|low-fat"],
-    ["Pumpkin Seeds",       44, 2.2, 1.4, 3.4,"breakfast|snacks|dessert","veg|balanced-iodine|low-gi"],
-    ["Sesame Seeds",        40, 1.3, 1.5, 3.3,"lunch|dinner|snacks",     "veg|easy-digest"],
-    ["Ghee Drizzle",        45, 0,   0,   5,  "breakfast|lunch|dinner",  "veg|high-fat|balanced-energy"],
-    ["Olive Oil Saute",     40, 0,   0,   4.5,"lunch|dinner",            "veg|low-fat|anti-inflammatory"],
-    ["Avocado Slices",      48, 0.6, 2.4, 4.2,"breakfast|lunch|dinner",  "veg|low-fat|easy-digest"],
-    ["Coconut Slices",      36, 0.4, 1.2, 3.3,"snacks|dessert|breakfast","veg|easy-digest"],
-    ["Cashew Crumble",      48, 1.5, 2.5, 3.8,"dessert|snacks|lunch",    "veg|nuts|balanced-energy"],
-    ["Tahini Drizzle",      42, 1.3, 1.4, 3.5,"lunch|dinner|snacks",     "veg|low-fat"],
-    ["Chia Seeds",          34, 1.2, 3,   2.2,"breakfast|dessert|snacks","veg|anti-inflammatory|easy-digest"],
-    ["Pistachio Dust",      28, 1.1, 1.3, 2.1,"dessert|snacks",          "veg|nuts"],
-    ["Sunflower Seeds",     38, 1.6, 1.5, 3.1,"breakfast|snacks|lunch",  "veg|low-sodium"],
-    ["Almond Butter",       52, 1.8, 2,   4.5,"breakfast|snacks|dessert","veg|nuts|balanced-energy"],
-    ["Mustard Oil Tempering",34, 0,  0,   3.8,"lunch|dinner",            "veg|anti-inflammatory"]
-  ]
-};
+// ─── REAL MEAL DATA FROM EXCEL DATABASE ────────────────────────────────────
+
+const BREAKFAST_MEALS = [
+  // ── 200–300 kcal ─────────────────────────────────────────────────────────
+  { name: "Jowar Ambil (250ml fermented drink)", type: "breakfast", calorie_range: "200-300", calories: 210, protein: 6, carbs: 30, fats: 4, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Sattu Drink (40g roasted gram flour)", type: "breakfast", calorie_range: "200-300", calories: 220, protein: 12, carbs: 30, fats: 4, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Steamed Dhokla (150g)", type: "breakfast", calorie_range: "200-300", calories: 230, protein: 10, carbs: 36, fats: 5, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Ragi Porridge (40g + milk 100ml)", type: "breakfast", calorie_range: "200-300", calories: 240, protein: 9, carbs: 38, fats: 6, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk"] },
+  { name: "Besan Chilla (80g batter)", type: "breakfast", calorie_range: "200-300", calories: 250, protein: 12, carbs: 30, fats: 8, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "2 Idli + Sambar", type: "breakfast", calorie_range: "200-300", calories: 260, protein: 9, carbs: 46, fats: 3, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Vegetable Poha (60g raw)", type: "breakfast", calorie_range: "200-300", calories: 265, protein: 7, carbs: 42, fats: 8, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Nuts"] },
+  { name: "Ghugni (150g)", type: "breakfast", calorie_range: "200-300", calories: 280, protein: 12, carbs: 42, fats: 7, fiber: 9, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Spices"] },
+  { name: "Bajra Raab (250ml)", type: "breakfast", calorie_range: "200-300", calories: 285, protein: 8, carbs: 40, fats: 7, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Boiled Sweet Potato (200g) + Mint Chutney", type: "breakfast", calorie_range: "200-300", calories: 290, protein: 4, carbs: 48, fats: 1, fiber: 7, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Egg White Bhurji (4 whites) + Spinach", type: "breakfast", calorie_range: "200-300", calories: 235, protein: 28, carbs: 8, fats: 10, fiber: 4, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Egg"] },
+
+  // ── 300–400 kcal ─────────────────────────────────────────────────────────
+  { name: "Sprouted Moong Salad (300g) + Roti", type: "breakfast", calorie_range: "300-400", calories: 310, protein: 16, carbs: 48, fats: 6, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+  { name: "Greek Yogurt Bowl (300g) + Nuts (15g)", type: "breakfast", calorie_range: "300-400", calories: 315, protein: 22, carbs: 18, fats: 12, fiber: 3, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk", "Nuts"] },
+  { name: "Thalipeeth (2 pcs) + Curd", type: "breakfast", calorie_range: "300-400", calories: 360, protein: 13, carbs: 48, fats: 12, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk"] },
+  { name: "Handvo (150g)", type: "breakfast", calorie_range: "300-400", calories: 380, protein: 12, carbs: 52, fats: 14, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Upma (200g) + Coconut Chutney", type: "breakfast", calorie_range: "300-400", calories: 385, protein: 10, carbs: 56, fats: 14, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+  { name: "Idiyappam (3 pcs) + Vegetable Kurma", type: "breakfast", calorie_range: "300-400", calories: 390, protein: 8, carbs: 62, fats: 8, fiber: 3, vegetarian: "Yes", diabetic_friendly: "No", allergens: [] },
+  { name: "Paneer Bhurji (100g) + 1 Phulka", type: "breakfast", calorie_range: "300-400", calories: 395, protein: 24, carbs: 28, fats: 18, fiber: 2, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk", "Gluten"] },
+  { name: "Aloo Paratha (2 small) + Green Chutney", type: "breakfast", calorie_range: "300-400", calories: 420, protein: 12, carbs: 60, fats: 12, fiber: 4, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Gluten"] },
+  { name: "Egg Omelette (2 eggs) + Toast", type: "breakfast", calorie_range: "300-400", calories: 430, protein: 18, carbs: 30, fats: 20, fiber: 2, vegetarian: "No", diabetic_friendly: "No", allergens: ["Egg", "Gluten"] },
+
+  // ── 400–500 kcal ─────────────────────────────────────────────────────────
+  { name: "Ven Pongal (200g)", type: "breakfast", calorie_range: "400-500", calories: 450, protein: 14, carbs: 68, fats: 12, fiber: 4, vegetarian: "Yes", diabetic_friendly: "No", allergens: [] },
+  { name: "Masala Dosa + Sambar", type: "breakfast", calorie_range: "400-500", calories: 460, protein: 12, carbs: 65, fats: 15, fiber: 6, vegetarian: "Yes", diabetic_friendly: "No", allergens: [] },
+  { name: "Roti (2) + Aloo Tori Sabzi", type: "breakfast", calorie_range: "400-500", calories: 460, protein: 9, carbs: 72, fats: 14, fiber: 6, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Gluten"] },
+  { name: "Masala Chole + Bread Toast (2 slices)", type: "breakfast", calorie_range: "400-500", calories: 470, protein: 14, carbs: 72, fats: 14, fiber: 10, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Gluten"] },
+  { name: "Poha + Kadala Curry", type: "breakfast", calorie_range: "400-500", calories: 480, protein: 14, carbs: 70, fats: 16, fiber: 8, vegetarian: "Yes", diabetic_friendly: "No", allergens: [] },
+  { name: "Chola Kulhe (1 cup + 2 bread)", type: "breakfast", calorie_range: "400-500", calories: 490, protein: 16, carbs: 78, fats: 14, fiber: 12, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Gluten"] },
+  { name: "Sprouted Moong (250g) + Roasted Chana", type: "breakfast", calorie_range: "400-500", calories: 485, protein: 30, carbs: 68, fats: 10, fiber: 14, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+
+  // ── 500–600 kcal ─────────────────────────────────────────────────────────
+  { name: "Moong Dal Chilla (120g batter) + Paneer", type: "breakfast", calorie_range: "500-600", calories: 520, protein: 40, carbs: 38, fats: 28, fiber: 8, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Milk"] },
+  { name: "Vegetable Millet Upma (large bowl)", type: "breakfast", calorie_range: "500-600", calories: 520, protein: 18, carbs: 76, fats: 12, fiber: 8, vegetarian: "Yes", diabetic_friendly: "No", allergens: [] },
+  { name: "Grilled Cheese Sandwich (2 pcs)", type: "breakfast", calorie_range: "500-600", calories: 540, protein: 22, carbs: 52, fats: 24, fiber: 3, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Milk", "Gluten"] },
+  { name: "Zunka + Bhakri (2 pcs)", type: "breakfast", calorie_range: "500-600", calories: 540, protein: 18, carbs: 68, fats: 18, fiber: 8, vegetarian: "Yes", diabetic_friendly: "No", allergens: [] },
+  { name: "Fish Omelette (2 eggs + fish 80g)", type: "breakfast", calorie_range: "500-600", calories: 548, protein: 38, carbs: 8, fats: 36, fiber: 2, vegetarian: "No", diabetic_friendly: "No", allergens: ["Egg", "Seafood"] },
+  { name: "Stuffed Methi Paratha (2 pcs) + Curd", type: "breakfast", calorie_range: "500-600", calories: 560, protein: 16, carbs: 75, fats: 18, fiber: 8, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Milk", "Gluten"] },
+  { name: "Egg Bhurji (3 eggs) + 2 Phulka", type: "breakfast", calorie_range: "500-600", calories: 560, protein: 25, carbs: 40, fats: 28, fiber: 4, vegetarian: "No", diabetic_friendly: "No", allergens: ["Egg", "Gluten"] },
+  { name: "Stuffed Paratha (2 pcs) + Curd", type: "breakfast", calorie_range: "500-600", calories: 595, protein: 32, carbs: 56, fats: 28, fiber: 6, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Milk", "Gluten"] },
+  { name: "Greek Curd (300g) + Chia + Almonds", type: "breakfast", calorie_range: "500-600", calories: 540, protein: 32, carbs: 22, fats: 36, fiber: 7, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Milk", "Nuts"] },
+  { name: "Grilled Chicken (220g) + Vegetables", type: "breakfast", calorie_range: "500-600", calories: 550, protein: 52, carbs: 18, fats: 30, fiber: 5, vegetarian: "No", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Kala Chana (300g boiled) + Curd", type: "breakfast", calorie_range: "500-600", calories: 580, protein: 40, carbs: 70, fats: 16, fiber: 16, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Milk"] },
+
+  // ── 600–700 kcal ─────────────────────────────────────────────────────────
+  { name: "Paneer Paratha (4 pcs) + Curd", type: "breakfast", calorie_range: "600-700", calories: 620, protein: 28, carbs: 72, fats: 25, fiber: 7, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Milk", "Gluten"] },
+  { name: "Aloo Puri + Chole (plate)", type: "breakfast", calorie_range: "600-700", calories: 650, protein: 14, carbs: 90, fats: 24, fiber: 7, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Gluten"] },
+  { name: "Masala Paratha (4 pcs) + Achaar", type: "breakfast", calorie_range: "600-700", calories: 670, protein: 26, carbs: 92, fats: 26, fiber: 6, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Gluten"] },
+  { name: "Chole Bhature (1 piece + chole)", type: "breakfast", calorie_range: "600-700", calories: 680, protein: 14, carbs: 92, fats: 28, fiber: 6, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Gluten"] },
+  { name: "Paneer Keema Bhurji + Toast (2 slices)", type: "breakfast", calorie_range: "600-700", calories: 688, protein: 38, carbs: 48, fats: 40, fiber: 4, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Milk", "Gluten"] },
+  { name: "Chicken Keema (100g) + 2 Roti", type: "breakfast", calorie_range: "600-700", calories: 690, protein: 38, carbs: 56, fats: 28, fiber: 6, vegetarian: "No", diabetic_friendly: "No", allergens: ["Gluten"] },
+  { name: "Chole Puri (full plate)", type: "breakfast", calorie_range: "600-700", calories: 695, protein: 18, carbs: 96, fats: 30, fiber: 12, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Gluten"] },
+
+  // ── 700–800 kcal ─────────────────────────────────────────────────────────
+  { name: "Paneer Tikka (200g) + Salad + Roti", type: "breakfast", calorie_range: "700-800", calories: 716, protein: 44, carbs: 18, fats: 52, fiber: 5, vegetarian: "Yes", diabetic_friendly: "No", allergens: ["Milk", "Gluten"] }
+];
+
+const LUNCH_MEALS = [
+  // ── 200–300 kcal ─────────────────────────────────────────────────────────
+  { name: "Moong Dal (150g cooked) + Brown Rice (100g) + Lauki Sabzi", type: "lunch", calorie_range: "200-300", calories: 292, protein: 14, carbs: 46, fats: 6, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Masoor Dal (150g cooked) + Phulka + Bhindi", type: "lunch", calorie_range: "200-300", calories: 298, protein: 13, carbs: 44, fats: 7, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+  { name: "Sambar (200ml) + Red Rice (100g) + Beans Poriyal", type: "lunch", calorie_range: "200-300", calories: 286, protein: 10, carbs: 48, fats: 5, fiber: 7, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Rasam (200ml) + Rice (100g) + Cabbage Stir Fry", type: "lunch", calorie_range: "200-300", calories: 284, protein: 9, carbs: 50, fats: 4, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Odisha Dalma (150g cooked) + Rice (100g)", type: "lunch", calorie_range: "200-300", calories: 289, protein: 12, carbs: 44, fats: 6, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Gujarati Thin Kadhi (200ml) + Brown Rice (100g)", type: "lunch", calorie_range: "200-300", calories: 285, protein: 8, carbs: 46, fats: 6, fiber: 3, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk"] },
+  { name: "Light Egg Curry (1 egg) + Rice (100g)", type: "lunch", calorie_range: "200-300", calories: 285, protein: 14, carbs: 38, fats: 10, fiber: 2, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Egg"] },
+  { name: "Light Rohu Fish Curry (80g) + Rice (100g)", type: "lunch", calorie_range: "200-300", calories: 290, protein: 20, carbs: 36, fats: 8, fiber: 2, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Seafood"] },
+
+  // ── 300–400 kcal ─────────────────────────────────────────────────────────
+  { name: "Rajma (180g cooked) + Brown Rice (150g)", type: "lunch", calorie_range: "300-400", calories: 372, protein: 17, carbs: 64, fats: 7, fiber: 10, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Chole (180g cooked) + Phulka (60g flour)", type: "lunch", calorie_range: "300-400", calories: 376, protein: 18, carbs: 66, fats: 9, fiber: 11, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+  { name: "Chicken Curry (120g cooked) + Brown Rice (120g)", type: "lunch", calorie_range: "300-400", calories: 369, protein: 30, carbs: 52, fats: 12, fiber: 4, vegetarian: "No", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Egg Curry (2 eggs) + Rice (120g)", type: "lunch", calorie_range: "300-400", calories: 365, protein: 22, carbs: 50, fats: 14, fiber: 3, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Egg"] },
+  { name: "Fish Curry (Rohu 120g) + Rice (120g)", type: "lunch", calorie_range: "300-400", calories: 378, protein: 30, carbs: 54, fats: 11, fiber: 3, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Seafood"] },
+  { name: "Paneer Bhurji (80g) + Phulka (60g flour)", type: "lunch", calorie_range: "300-400", calories: 368, protein: 22, carbs: 44, fats: 18, fiber: 5, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk", "Gluten"] },
+  { name: "Bengali Musur Dal (200g) + Rice (150g) + Pumpkin Sabzi", type: "lunch", calorie_range: "300-400", calories: 362, protein: 14, carbs: 64, fats: 7, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+
+  // ── 400–500 kcal ─────────────────────────────────────────────────────────
+  { name: "Chicken Curry (150g) + Brown Rice (150g)", type: "lunch", calorie_range: "400-500", calories: 445, protein: 35, carbs: 60, fats: 14, fiber: 4, vegetarian: "No", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Fish Curry (Rohu 150g) + Rice (150g)", type: "lunch", calorie_range: "400-500", calories: 448, protein: 34, carbs: 58, fats: 14, fiber: 3, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Seafood"] },
+  { name: "Paneer Bhurji (120g) + Phulka (60g) + Salad", type: "lunch", calorie_range: "400-500", calories: 458, protein: 26, carbs: 48, fats: 20, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk", "Gluten"] },
+  { name: "Rajma (220g) + Brown Rice (150g)", type: "lunch", calorie_range: "400-500", calories: 462, protein: 19, carbs: 70, fats: 8, fiber: 12, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Chole (220g) + Rice (150g)", type: "lunch", calorie_range: "400-500", calories: 465, protein: 20, carbs: 72, fats: 12, fiber: 11, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Bengali Shorshe Rohu (150g) + Rice (150g)", type: "lunch", calorie_range: "400-500", calories: 468, protein: 34, carbs: 60, fats: 18, fiber: 3, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Seafood"] },
+  { name: "Kerala Fish Curry (Sardine 150g) + Red Rice", type: "lunch", calorie_range: "400-500", calories: 472, protein: 36, carbs: 62, fats: 16, fiber: 4, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Seafood"] },
+  { name: "Gujarati Undhiyu (250g) + Phulka", type: "lunch", calorie_range: "400-500", calories: 456, protein: 14, carbs: 60, fats: 14, fiber: 11, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+  { name: "Baingan Bharta (250g) + Phulka (60g)", type: "lunch", calorie_range: "400-500", calories: 448, protein: 11, carbs: 56, fats: 16, fiber: 10, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+  { name: "Light Mutton Curry (120g lean) + Brown Rice (150g)", type: "lunch", calorie_range: "400-500", calories: 462, protein: 32, carbs: 60, fats: 18, fiber: 3, vegetarian: "No", diabetic_friendly: "Yes", allergens: [] },
+
+  // ── 500–600 kcal ─────────────────────────────────────────────────────────
+  { name: "Mutton Curry (150g lean) + Rice (180g)", type: "lunch", calorie_range: "500-600", calories: 565, protein: 38, carbs: 72, fats: 22, fiber: 3, vegetarian: "No", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Pomfret Curry (180g) + Rice (180g)", type: "lunch", calorie_range: "500-600", calories: 558, protein: 40, carbs: 70, fats: 18, fiber: 3, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Seafood"] },
+  { name: "Chicken Thali (150g + Phulka + Dal)", type: "lunch", calorie_range: "500-600", calories: 572, protein: 45, carbs: 68, fats: 20, fiber: 9, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+  { name: "Vegetarian Thali (Paneer 150g + Rice + Dal)", type: "lunch", calorie_range: "500-600", calories: 568, protein: 32, carbs: 80, fats: 22, fiber: 10, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk"] },
+  { name: "Prawn Curry (180g) + Rice (180g)", type: "lunch", calorie_range: "500-600", calories: 578, protein: 42, carbs: 74, fats: 20, fiber: 3, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Seafood"] },
+  { name: "Curd Rice (300g) + Vegetable Fry", type: "lunch", calorie_range: "500-600", calories: 542, protein: 14, carbs: 78, fats: 14, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk"] },
+  { name: "Dal Tadka (250g) + Phulka (90g flour)", type: "lunch", calorie_range: "500-600", calories: 548, protein: 22, carbs: 82, fats: 16, fiber: 13, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+
+  // ── 600–700 kcal ─────────────────────────────────────────────────────────
+  { name: "Bengali Fish Thali (Rohu 180g + 200g Rice + Dal + Sabzi)", type: "lunch", calorie_range: "600-700", calories: 620, protein: 45, carbs: 94, fats: 20, fiber: 9, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Seafood"] },
+  { name: "Chicken Thali (200g + Phulka + Rajma)", type: "lunch", calorie_range: "600-700", calories: 638, protein: 55, carbs: 82, fats: 24, fiber: 11, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+  { name: "Gujarati Thali (Undhiyu + Dal + Phulka + Rice)", type: "lunch", calorie_range: "600-700", calories: 652, protein: 22, carbs: 98, fats: 18, fiber: 12, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+
+  // ── 700–800 kcal ─────────────────────────────────────────────────────────
+  { name: "Paneer Butter Masala (200g) + Phulka + Rice", type: "lunch", calorie_range: "700-800", calories: 718, protein: 34, carbs: 98, fats: 34, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk", "Gluten"] },
+  { name: "Hyderabadi Chicken Biryani (350g) + Raita", type: "lunch", calorie_range: "700-800", calories: 742, protein: 52, carbs: 96, fats: 30, fiber: 5, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Milk"] },
+  { name: "Prawn Curry (220g) + Rice (200g) + Vegetable Stir Fry", type: "lunch", calorie_range: "700-800", calories: 758, protein: 55, carbs: 96, fats: 26, fiber: 7, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Seafood"] },
+  { name: "Rajma Chawal Large Plate (300g + 250g + Salad)", type: "lunch", calorie_range: "700-800", calories: 728, protein: 30, carbs: 130, fats: 14, fiber: 18, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Chole Bhature (2 Medium, controlled oil)", type: "lunch", calorie_range: "700-800", calories: 762, protein: 24, carbs: 110, fats: 32, fiber: 10, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+
+  // ── 800–900 kcal ─────────────────────────────────────────────────────────
+  { name: "Chole Bhature Large (2 Large Pcs + Extra Chole)", type: "lunch", calorie_range: "800-900", calories: 790, protein: 28, carbs: 110, fats: 32, fiber: 15, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Gluten", "Milk"] },
+  { name: "Kerala Fish Thali (Sardine 220g + Red Rice + Dal + Thoran)", type: "lunch", calorie_range: "800-900", calories: 808, protein: 46, carbs: 88, fats: 32, fiber: 6, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Seafood", "Milk"] },
+  { name: "Prawn Masala (220g) + Rice (220g) + Papad", type: "lunch", calorie_range: "800-900", calories: 820, protein: 48, carbs: 86, fats: 34, fiber: 4, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Seafood"] },
+  { name: "Paneer Butter Masala Large (250g) + Naan (90g)", type: "lunch", calorie_range: "800-900", calories: 832, protein: 32, carbs: 78, fats: 42, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk", "Gluten"] },
+  { name: "Bengali Hilsa Fish Curry (200g) + Rice (220g) + Sabzi", type: "lunch", calorie_range: "800-900", calories: 845, protein: 50, carbs: 82, fats: 36, fiber: 4, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Seafood"] },
+  { name: "Mutton Biryani (300g) + Raita", type: "lunch", calorie_range: "800-900", calories: 858, protein: 52, carbs: 88, fats: 36, fiber: 5, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Milk"] },
+  { name: "Vegetable Biryani Large (350g) + Raita", type: "lunch", calorie_range: "800-900", calories: 865, protein: 24, carbs: 116, fats: 28, fiber: 14, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk"] },
+
+  // ── 900–1000 kcal ────────────────────────────────────────────────────────
+  { name: "Chole Bhature Extra Large (3 Pcs + Extra Chole)", type: "lunch", calorie_range: "900-1000", calories: 878, protein: 30, carbs: 122, fats: 35, fiber: 17, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Gluten", "Milk"] },
+  { name: "Bengali Fish Thali Large (250g Rohu + 250g Rice + Dal + 2 Sabzi)", type: "lunch", calorie_range: "900-1000", calories: 895, protein: 52, carbs: 92, fats: 40, fiber: 6, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Seafood"] },
+  { name: "Chicken Thali Large (250g + Rice + Dal + Roti + Sabzi)", type: "lunch", calorie_range: "900-1000", calories: 920, protein: 58, carbs: 92, fats: 38, fiber: 7, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+  { name: "Mutton Curry Large (220g) + Rice (250g) + Phulka", type: "lunch", calorie_range: "900-1000", calories: 938, protein: 55, carbs: 96, fats: 42, fiber: 6, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+  { name: "Paneer Tikka Masala (300g) + Naan (120g) + Rice (100g)", type: "lunch", calorie_range: "900-1000", calories: 952, protein: 36, carbs: 106, fats: 44, fiber: 9, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk", "Gluten"] },
+
+  // ── 1000–1100 kcal ───────────────────────────────────────────────────────
+  { name: "Paneer Makhani Large (350g) + Naan (120g) + Rice (100g)", type: "lunch", calorie_range: "1000-1100", calories: 1020, protein: 38, carbs: 118, fats: 46, fiber: 10, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk", "Gluten"] },
+  { name: "Rajma Chawal Full Plate (350g + 300g + Salad + Papad)", type: "lunch", calorie_range: "1000-1100", calories: 1045, protein: 32, carbs: 130, fats: 40, fiber: 18, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: [] },
+  { name: "Chicken Biryani Full Plate (450g) + Raita + Mirchi Salan", type: "lunch", calorie_range: "1000-1100", calories: 1065, protein: 60, carbs: 104, fats: 46, fiber: 8, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Milk"] },
+  { name: "Mutton Rogan Josh (300g) + Rice (250g) + Naan", type: "lunch", calorie_range: "1000-1100", calories: 1080, protein: 65, carbs: 108, fats: 48, fiber: 8, vegetarian: "No", diabetic_friendly: "Yes", allergens: ["Gluten"] },
+  { name: "Vegetarian Thali Full (Paneer + Rajma + Dal + 3 Phulka + Rice)", type: "lunch", calorie_range: "1000-1100", calories: 1095, protein: 42, carbs: 118, fats: 46, fiber: 12, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: ["Milk", "Gluten"] }
+];
+
+const DINNER_MEALS = [
+  // ── 200–300 kcal ─────────────────────────────────────────────────────────
+  { name: "Moong Dal Clear Broth (300g, strained) + Steamed Spinach (150g) + 1 Small Phulka (30g flour)", type: "dinner", calorie_range: "200-300", calories: 230, protein: 14, carbs: 26, fats: 5, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Grilled Rohu (120g) + Lauki-Tomato Stew (180g) + 150g Steamed Rice", type: "dinner", calorie_range: "200-300", calories: 260, protein: 26, carbs: 10, fats: 14, fiber: 4, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Seafood" },
+  { name: "Egg White Bhurji (3 whites + 1 whole egg) + Sautéed Palak (150g) + 1 Small Phulka (30g flour)", type: "dinner", calorie_range: "200-300", calories: 255, protein: 24, carbs: 8, fats: 12, fiber: 4, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Egg" },
+  { name: "Gujarati Thin Kadhi (300ml, low-fat) + 1 Small Phulka (30g flour)", type: "dinner", calorie_range: "200-300", calories: 210, protein: 10, carbs: 20, fats: 9, fiber: 2, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Sprouted Moong Warm Salad (220g) + Lemon + 1 Small Ragi Roti (30g flour)", type: "dinner", calorie_range: "200-300", calories: 250, protein: 18, carbs: 32, fats: 6, fiber: 10, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Kerala Vegetable Stew (Coconut light, 250g) + 2 Small Appam", type: "dinner", calorie_range: "200-300", calories: 280, protein: 8, carbs: 24, fats: 18, fiber: 5, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Andhra Tomato Rasam (350ml) + Beans Poriyal (150g) + 120g Brown Rice", type: "dinner", calorie_range: "200-300", calories: 225, protein: 9, carbs: 28, fats: 6, fiber: 7, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+
+  // ── 300–400 kcal ─────────────────────────────────────────────────────────
+  { name: "Grilled Chicken (150g) + Stir Fry Zucchini (150g) + 120g Brown Rice", type: "dinner", calorie_range: "300-400", calories: 360, protein: 36, carbs: 10, fats: 18, fiber: 3, vegetarian: "No", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Paneer Tikka (150g) + Mint Chutney + 1 Small Jowar Roti (30g flour)", type: "dinner", calorie_range: "300-400", calories: 390, protein: 26, carbs: 12, fats: 28, fiber: 2, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Bengali Light Fish Jhol (Rohu 150g, minimal oil) + 150g Steamed Rice", type: "dinner", calorie_range: "300-400", calories: 320, protein: 30, carbs: 8, fats: 16, fiber: 2, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Seafood" },
+  { name: "Adai (2 small, 150g batter, no chutney)", type: "dinner", calorie_range: "300-400", calories: 340, protein: 18, carbs: 42, fats: 10, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Sundal (250g boiled chana, tempered light) + 1 Small Ragi Roti (30g flour)", type: "dinner", calorie_range: "300-400", calories: 370, protein: 19, carbs: 54, fats: 8, fiber: 12, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Egg Curry (2 eggs, light gravy) + 1 Small Phulka (30g flour)", type: "dinner", calorie_range: "300-400", calories: 330, protein: 20, carbs: 8, fats: 24, fiber: 2, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Egg" },
+  { name: "Jowar Ambil (Fermented, 400ml) + Light Vegetable Stir Fry", type: "dinner", calorie_range: "300-400", calories: 310, protein: 12, carbs: 48, fats: 6, fiber: 7, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+
+  // ── 400–500 kcal ─────────────────────────────────────────────────────────
+  { name: "Grilled Chicken (180g) + Sautéed Mixed Vegetables (200g) + 120g Brown Rice", type: "dinner", calorie_range: "400-500", calories: 430, protein: 44, carbs: 16, fats: 22, fiber: 5, vegetarian: "No", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Kerala Seer Fish Curry (180g, light coconut) + Beans Thoran (150g) + 120g Red Rice", type: "dinner", calorie_range: "400-500", calories: 460, protein: 38, carbs: 18, fats: 26, fiber: 6, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Seafood" },
+  { name: "Paneer Tikka (200g) + Stir Fry Capsicum (150g) + 1 Small Jowar Roti (30g flour)", type: "dinner", calorie_range: "400-500", calories: 480, protein: 32, carbs: 14, fats: 34, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Egg Masala (3 eggs, reduced oil) + Cabbage Peas Stir Fry (180g) + 1 Small Phulka (30g flour)", type: "dinner", calorie_range: "400-500", calories: 470, protein: 28, carbs: 20, fats: 32, fiber: 5, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Egg" },
+  { name: "Sundal Bowl (300g boiled chana) + Cucumber Salad + 1 Small Ragi Roti (30g flour)", type: "dinner", calorie_range: "400-500", calories: 420, protein: 22, carbs: 62, fats: 10, fiber: 14, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Maharashtrian Zunka (Besan 120g cooked) + Bhindi Stir Fry (150g) + 1 Small Bajra Bhakri (40g flour)", type: "dinner", calorie_range: "400-500", calories: 450, protein: 24, carbs: 36, fats: 22, fiber: 9, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Bengali Light Chingri (Prawn 180g, minimal oil) + Lauki Sabzi (180g) + 150g Steamed Rice", type: "dinner", calorie_range: "400-500", calories: 480, protein: 42, carbs: 16, fats: 30, fiber: 4, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Seafood" },
+  { name: "Adai (2 medium) + Coconut Chutney (15g, controlled)", type: "dinner", calorie_range: "400-500", calories: 440, protein: 20, carbs: 48, fats: 18, fiber: 9, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Gujarati Handvo (200g, baked) + Mint Chutney", type: "dinner", calorie_range: "400-500", calories: 470, protein: 18, carbs: 52, fats: 18, fiber: 7, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Hyderabadi Egg Keema (3 eggs scrambled) + Spinach (150g) + 1 Small Phulka (30g flour)", type: "dinner", calorie_range: "400-500", calories: 460, protein: 30, carbs: 10, fats: 34, fiber: 4, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Egg" },
+
+  // ── 500–600 kcal ─────────────────────────────────────────────────────────
+  { name: "Grilled Chicken (220g) + Broccoli-Carrot Stir Fry (200g) + 120g Brown Rice", type: "dinner", calorie_range: "500-600", calories: 540, protein: 52, carbs: 18, fats: 30, fiber: 6, vegetarian: "No", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Kerala Seer Fish (220g, light coconut gravy) + Cabbage Thoran (180g) + 120g Red Rice", type: "dinner", calorie_range: "500-600", calories: 560, protein: 44, carbs: 22, fats: 34, fiber: 7, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Seafood" },
+  { name: "Paneer Tikka (220g) + Palak Stir Fry (200g) + 1 Small Jowar Roti (30g flour)", type: "dinner", calorie_range: "500-600", calories: 590, protein: 36, carbs: 18, fats: 40, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Egg Curry (4 eggs, reduced oil) + Beans-Carrot Sabzi (200g) + 1 Small Phulka (30g flour)", type: "dinner", calorie_range: "500-600", calories: 560, protein: 32, carbs: 22, fats: 38, fiber: 6, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Egg" },
+  { name: "Maharashtrian Zunka (150g, besan cooked) + Bhindi (200g) + 1 Small Bajra Bhakri (40g flour)", type: "dinner", calorie_range: "500-600", calories: 520, protein: 28, carbs: 40, fats: 28, fiber: 11, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Bengali Chingri (220g prawn, light mustard gravy) + Lauki (200g) + 150g Steamed Rice", type: "dinner", calorie_range: "500-600", calories: 580, protein: 50, carbs: 18, fats: 38, fiber: 5, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Seafood" },
+  { name: "Adai (3 medium) + Mint Chutney (20g)", type: "dinner", calorie_range: "500-600", calories: 520, protein: 26, carbs: 62, fats: 20, fiber: 12, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Gujarati Handvo (220g, baked) + Cucumber Raita (100g)", type: "dinner", calorie_range: "500-600", calories: 550, protein: 20, carbs: 58, fats: 22, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Hyderabadi Chicken Keema (200g) + Stir Fry Capsicum (200g) + 1 Small Phulka (30g flour)", type: "dinner", calorie_range: "500-600", calories: 590, protein: 48, carbs: 16, fats: 32, fiber: 5, vegetarian: "No", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Palak Paneer (220g, light) + Sautéed Mushroom (150g) + 1 Small Phulka (30g flour)", type: "dinner", calorie_range: "500-600", calories: 570, protein: 30, carbs: 18, fats: 42, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+
+  // ── 600–700 kcal ─────────────────────────────────────────────────────────
+  { name: "Tandoori Chicken (250g) + Grilled Vegetables (250g) + 120g Brown Rice", type: "dinner", calorie_range: "600-700", calories: 610, protein: 60, carbs: 24, fats: 36, fiber: 7, vegetarian: "No", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Kerala Seer Fish Roast (250g) + Cabbage Thoran (200g) + 120g Red Rice", type: "dinner", calorie_range: "600-700", calories: 670, protein: 50, carbs: 20, fats: 46, fiber: 6, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Seafood" },
+  { name: "Paneer Tikka (250g) + Palak Mushroom Stir Fry (250g) + 1 Small Jowar Roti (30g flour)", type: "dinner", calorie_range: "600-700", calories: 690, protein: 40, carbs: 20, fats: 50, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Hyderabadi Chicken Keema (250g) + Sautéed Beans (250g) + 120g Brown Rice", type: "dinner", calorie_range: "600-700", calories: 680, protein: 56, carbs: 18, fats: 48, fiber: 6, vegetarian: "No", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Egg Masala (5 eggs, controlled oil) + Spinach (200g) + 1 Small Ragi Roti (30g flour)", type: "dinner", calorie_range: "600-700", calories: 650, protein: 38, carbs: 18, fats: 48, fiber: 5, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Egg" },
+  { name: "Maharashtrian Mutton Sukka (220g, lean) + Bhindi Fry (200g) + 1 Small Bajra Bhakri (40g flour)", type: "dinner", calorie_range: "600-700", calories: 700, protein: 52, carbs: 21, fats: 50, fiber: 7, vegetarian: "No", diabetic_friendly: "No", allergens: "Nut" },
+  { name: "Gujarati Zunka (180g, besan) + Cabbage Peas (250g) + 1 Small Jowar Roti (30g flour)", type: "dinner", calorie_range: "600-700", calories: 620, protein: 32, carbs: 48, fats: 31, fiber: 12, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Bengali Mustard Prawn (250g) + Lauki (250g) + 150g Steamed Rice", type: "dinner", calorie_range: "600-700", calories: 690, protein: 56, carbs: 16, fats: 50, fiber: 6, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Seafood" },
+  { name: "Adai (3 large) + Coconut Chutney (25g, controlled)", type: "dinner", calorie_range: "600-700", calories: 610, protein: 30, carbs: 72, fats: 22, fiber: 14, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Palak Paneer (250g) + Mushroom Stir Fry (200g) + 1 Small Phulka (30g flour)", type: "dinner", calorie_range: "600-700", calories: 660, protein: 34, carbs: 22, fats: 48, fiber: 7, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+
+  // ── 700–900 kcal ─────────────────────────────────────────────────────────
+  { name: "Butter Chicken (300g, moderate oil) + 2 Phulka (60g flour)", type: "dinner", calorie_range: "700-900", calories: 760, protein: 60, carbs: 58, fats: 40, fiber: 6, vegetarian: "No", diabetic_friendly: "No", allergens: "Gluten" },
+  { name: "Hyderabadi Chicken Biryani (400g, controlled oil)", type: "dinner", calorie_range: "700-900", calories: 780, protein: 52, carbs: 92, fats: 30, fiber: 5, vegetarian: "No", diabetic_friendly: "No", allergens: "" },
+  { name: "Paneer Butter Masala (300g) + 2 Phulka", type: "dinner", calorie_range: "700-900", calories: 820, protein: 38, carbs: 60, fats: 50, fiber: 6, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Milk, Gluten" },
+  { name: "Kerala Seer Fish Fry (280g) + Cabbage Thoran (250g) + 120g Red Rice", type: "dinner", calorie_range: "700-900", calories: 730, protein: 60, carbs: 22, fats: 48, fiber: 6, vegetarian: "No", diabetic_friendly: "No", allergens: "Seafood" },
+  { name: "Bengali Ilish Bhapa (250g Hilsa, mustard steamed) + Lauki (250g) + 150g Steamed Rice", type: "dinner", calorie_range: "700-900", calories: 800, protein: 52, carbs: 18, fats: 58, fiber: 5, vegetarian: "No", diabetic_friendly: "No", allergens: "Seafood" },
+  { name: "Mutton Rogan (250g lean) + 2 Phulka", type: "dinner", calorie_range: "700-900", calories: 850, protein: 58, carbs: 52, fats: 58, fiber: 5, vegetarian: "No", diabetic_friendly: "No", allergens: "Gluten" },
+  { name: "Gujarati Undhiyu (350g) + Kadhi (250ml) + 1 Jowar Roti", type: "dinner", calorie_range: "700-900", calories: 720, protein: 21, carbs: 88, fats: 34, fiber: 14, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Prawn Masala (300g) + Sautéed Beans (250g) + 120g Brown Rice", type: "dinner", calorie_range: "700-900", calories: 840, protein: 70, carbs: 20, fats: 58, fiber: 7, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Seafood" },
+  { name: "Chicken Tikka (300g) + Stir Fry Vegetables (300g) + 120g Brown Rice", type: "dinner", calorie_range: "700-900", calories: 720, protein: 66, carbs: 28, fats: 42, fiber: 8, vegetarian: "No", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Palak Paneer (300g) + Mushroom Stir Fry (250g) + 1 Small Phulka (30g flour)", type: "dinner", calorie_range: "700-900", calories: 780, protein: 42, carbs: 24, fats: 58, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+
+  // ── 900–1000 kcal ────────────────────────────────────────────────────────
+  { name: "Butter Chicken (350g) + 2 Butter Naan (100g flour total)", type: "dinner", calorie_range: "900-1000", calories: 940, protein: 68, carbs: 78, fats: 60, fiber: 6, vegetarian: "No", diabetic_friendly: "No", allergens: "Gluten" },
+  { name: "Hyderabadi Chicken Biryani (500g cooked, moderate oil) + Raita (200g)", type: "dinner", calorie_range: "900-1000", calories: 920, protein: 60, carbs: 110, fats: 38, fiber: 5, vegetarian: "No", diabetic_friendly: "No", allergens: "Milk" },
+  { name: "Mutton Rogan (300g lean) + 2 Phulka (60g flour)", type: "dinner", calorie_range: "900-1000", calories: 960, protein: 70, carbs: 52, fats: 72, fiber: 5, vegetarian: "No", diabetic_friendly: "No", allergens: "Gluten" },
+  { name: "Paneer Butter Masala (350g) + 2 Butter Naan", type: "dinner", calorie_range: "900-1000", calories: 880, protein: 46, carbs: 84, fats: 70, fiber: 6, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Milk, Gluten" },
+  { name: "Kerala Seer Fish Fry (320g) + 150g Red Rice", type: "dinner", calorie_range: "900-1000", calories: 910, protein: 68, carbs: 62, fats: 58, fiber: 5, vegetarian: "No", diabetic_friendly: "No", allergens: "Seafood" },
+  { name: "Bengali Ilish Bhapa (300g) + 180g Rice", type: "dinner", calorie_range: "900-1000", calories: 950, protein: 62, carbs: 68, fats: 70, fiber: 5, vegetarian: "No", diabetic_friendly: "No", allergens: "Seafood" },
+  { name: "Prawn Masala (350g) + 150g Rice", type: "dinner", calorie_range: "900-1000", calories: 980, protein: 76, carbs: 62, fats: 72, fiber: 5, vegetarian: "No", diabetic_friendly: "No", allergens: "Seafood" },
+  { name: "Chicken Tikka (350g) + 2 Phulka", type: "dinner", calorie_range: "900-1000", calories: 900, protein: 80, carbs: 52, fats: 56, fiber: 5, vegetarian: "No", diabetic_friendly: "No", allergens: "Gluten" },
+  { name: "Gujarati Undhiyu (400g) + Kadhi (300ml) + 1 Jowar Roti", type: "dinner", calorie_range: "900-1000", calories: 910, protein: 28, carbs: 120, fats: 42, fiber: 18, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Palak Paneer (350g) + Mushroom Stir Fry (300g) + 1 Small Phulka (30g flour)", type: "dinner", calorie_range: "900-1000", calories: 900, protein: 48, carbs: 30, fats: 72, fiber: 9, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+
+  // ── 1000–1100 kcal ───────────────────────────────────────────────────────
+  { name: "Butter Chicken (400g) + 2 Butter Naan (120g flour total)", type: "dinner", calorie_range: "1000-1100", calories: 1040, protein: 76, carbs: 92, fats: 72, fiber: 6, vegetarian: "No", diabetic_friendly: "No", allergens: "Gluten" },
+  { name: "Hyderabadi Chicken Biryani (600g cooked) + Raita (200g)", type: "dinner", calorie_range: "1000-1100", calories: 1030, protein: 70, carbs: 128, fats: 42, fiber: 7, vegetarian: "No", diabetic_friendly: "No", allergens: "Milk" },
+  { name: "Mutton Rogan (350g lean) + 2 Butter Naan", type: "dinner", calorie_range: "1000-1100", calories: 1080, protein: 82, carbs: 84, fats: 82, fiber: 5, vegetarian: "No", diabetic_friendly: "No", allergens: "Gluten" },
+  { name: "Paneer Butter Masala (400g) + 2 Butter Naan", type: "dinner", calorie_range: "1000-1100", calories: 1100, protein: 54, carbs: 92, fats: 86, fiber: 6, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Milk, Gluten" },
+  { name: "Kerala Seer Fish Fry (350g) + 200g Red Rice", type: "dinner", calorie_range: "1000-1100", calories: 1010, protein: 78, carbs: 88, fats: 62, fiber: 7, vegetarian: "No", diabetic_friendly: "No", allergens: "Seafood" },
+  { name: "Bengali Ilish Bhapa (350g) + 200g Rice", type: "dinner", calorie_range: "1000-1100", calories: 1060, protein: 70, carbs: 82, fats: 82, fiber: 5, vegetarian: "No", diabetic_friendly: "No", allergens: "Seafood" },
+  { name: "Prawn Masala (400g) + 180g Rice", type: "dinner", calorie_range: "1000-1100", calories: 1090, protein: 88, carbs: 84, fats: 86, fiber: 5, vegetarian: "No", diabetic_friendly: "No", allergens: "Seafood" },
+  { name: "Chicken Tikka (400g) + 2 Phulka", type: "dinner", calorie_range: "1000-1100", calories: 1000, protein: 92, carbs: 52, fats: 66, fiber: 5, vegetarian: "No", diabetic_friendly: "No", allergens: "Gluten" },
+  { name: "Gujarati Undhiyu (450g) + Kadhi (350ml) + 1 Jowar Roti", type: "dinner", calorie_range: "1000-1100", calories: 1020, protein: 32, carbs: 140, fats: 50, fiber: 20, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Palak Paneer (400g) + Mushroom Stir Fry (350g) + 1 Small Phulka (30g flour)", type: "dinner", calorie_range: "1000-1100", calories: 1000, protein: 56, carbs: 38, fats: 80, fiber: 10, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" }
+];
+
+const SNACKS_MEALS = [
+  { name: "Roasted Chana", type: "snacks", calorie_range: "120-180", calories: 150, protein: 8, carbs: 22, fats: 2, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Sprouted Moong Salad", type: "snacks", calorie_range: "150-210", calories: 180, protein: 10, carbs: 28, fats: 2, fiber: 7, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Boiled Kala Chana", type: "snacks", calorie_range: "160-220", calories: 190, protein: 10, carbs: 32, fats: 2, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Chana + Onion + Lemon", type: "snacks", calorie_range: "160-220", calories: 190, protein: 10, carbs: 30, fats: 2, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Peanut + Gur", type: "snacks", calorie_range: "220-300", calories: 260, protein: 10, carbs: 20, fats: 16, fiber: 4, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Peanuts" },
+  { name: "Roasted Makhana", type: "snacks", calorie_range: "100-150", calories: 120, protein: 4, carbs: 15, fats: 4, fiber: 2, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Makhana + Almonds", type: "snacks", calorie_range: "180-240", calories: 210, protein: 7, carbs: 18, fats: 12, fiber: 3, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Nuts" },
+  { name: "Muri + Peanut", type: "snacks", calorie_range: "150-220", calories: 190, protein: 6, carbs: 28, fats: 7, fiber: 3, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Peanuts" },
+  { name: "Muri + Chana", type: "snacks", calorie_range: "160-230", calories: 200, protein: 8, carbs: 30, fats: 3, fiber: 5, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Muri + Sprouts", type: "snacks", calorie_range: "180-250", calories: 220, protein: 9, carbs: 32, fats: 4, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Sattu Drink", type: "snacks", calorie_range: "150-220", calories: 180, protein: 10, carbs: 28, fats: 2, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Sattu + Yogurt", type: "snacks", calorie_range: "200-260", calories: 230, protein: 12, carbs: 30, fats: 6, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Sweet Potato Chaat", type: "snacks", calorie_range: "180-240", calories: 210, protein: 4, carbs: 38, fats: 2, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Boiled Corn", type: "snacks", calorie_range: "180-240", calories: 210, protein: 6, carbs: 30, fats: 3, fiber: 4, vegetarian: "Yes", diabetic_friendly: "No", allergens: "" },
+  { name: "Boiled Potato (Black Salt)", type: "snacks", calorie_range: "160-220", calories: 190, protein: 4, carbs: 35, fats: 1, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Fruit + Peanut Butter", type: "snacks", calorie_range: "200-260", calories: 230, protein: 7, carbs: 30, fats: 10, fiber: 5, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Peanuts" },
+  { name: "Apple + Peanut Butter", type: "snacks", calorie_range: "180-250", calories: 220, protein: 6, carbs: 25, fats: 12, fiber: 5, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Peanuts" },
+  { name: "Banana + Peanut Butter", type: "snacks", calorie_range: "250-320", calories: 290, protein: 10, carbs: 34, fats: 14, fiber: 4, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Peanuts" },
+  { name: "Guava + Black Salt", type: "snacks", calorie_range: "100-140", calories: 120, protein: 3, carbs: 22, fats: 1, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Papaya Bowl", type: "snacks", calorie_range: "80-120", calories: 100, protein: 1, carbs: 24, fats: 0, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Mixed Nuts", type: "snacks", calorie_range: "220-300", calories: 260, protein: 8, carbs: 16, fats: 20, fiber: 5, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Nuts" },
+  { name: "Almond + Dates", type: "snacks", calorie_range: "200-280", calories: 240, protein: 7, carbs: 28, fats: 12, fiber: 4, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Nuts" },
+  { name: "Walnut + Fruit", type: "snacks", calorie_range: "220-300", calories: 260, protein: 6, carbs: 26, fats: 18, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Nuts" },
+  { name: "Til + Flax Seeds Mix", type: "snacks", calorie_range: "200-260", calories: 230, protein: 8, carbs: 20, fats: 14, fiber: 7, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Sesame" },
+  { name: "Peanut + Roasted Chana", type: "snacks", calorie_range: "220-300", calories: 260, protein: 10, carbs: 22, fats: 16, fiber: 7, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Peanuts" },
+  { name: "Sprouted Chana", type: "snacks", calorie_range: "180-240", calories: 210, protein: 11, carbs: 30, fats: 3, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Sprouted Moong", type: "snacks", calorie_range: "180-250", calories: 220, protein: 12, carbs: 32, fats: 3, fiber: 8, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Boiled Egg", type: "snacks", calorie_range: "70-110", calories: 80, protein: 6, carbs: 1, fats: 5, fiber: 0, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Egg" },
+  { name: "Egg + Vegetable Salad", type: "snacks", calorie_range: "120-180", calories: 150, protein: 10, carbs: 5, fats: 8, fiber: 2, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Egg" },
+  { name: "Omelette (1 egg + veggies)", type: "snacks", calorie_range: "150-220", calories: 180, protein: 12, carbs: 5, fats: 10, fiber: 2, vegetarian: "No", diabetic_friendly: "Yes", allergens: "Egg" },
+  { name: "Paneer Cutlet", type: "snacks", calorie_range: "180-240", calories: 210, protein: 14, carbs: 6, fats: 12, fiber: 0, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Paneer + Black Salt", type: "snacks", calorie_range: "200-260", calories: 230, protein: 14, carbs: 6, fats: 14, fiber: 0, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Paneer + Flax Seeds", type: "snacks", calorie_range: "200-260", calories: 230, protein: 14, carbs: 8, fats: 14, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Hung Curd Dip + Veggies", type: "snacks", calorie_range: "180-240", calories: 210, protein: 12, carbs: 12, fats: 10, fiber: 6, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Yogurt + Fruit", type: "snacks", calorie_range: "150-220", calories: 180, protein: 9, carbs: 24, fats: 5, fiber: 3, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Chire + Yogurt", type: "snacks", calorie_range: "180-250", calories: 220, protein: 8, carbs: 40, fats: 4, fiber: 4, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Milk" },
+  { name: "Chire + Peanut", type: "snacks", calorie_range: "250-320", calories: 290, protein: 10, carbs: 45, fats: 12, fiber: 5, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Peanuts" },
+  { name: "Chire + Sprouts", type: "snacks", calorie_range: "220-300", calories: 260, protein: 10, carbs: 42, fats: 5, fiber: 7, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Poha + Vegetables", type: "snacks", calorie_range: "200-260", calories: 230, protein: 7, carbs: 38, fats: 5, fiber: 4, vegetarian: "Yes", diabetic_friendly: "No", allergens: "" },
+  { name: "Upma + Vegetables", type: "snacks", calorie_range: "220-300", calories: 260, protein: 8, carbs: 40, fats: 6, fiber: 5, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Gluten" },
+  { name: "Vegetable Sandwich (Brown Bread)", type: "snacks", calorie_range: "200-280", calories: 240, protein: 9, carbs: 35, fats: 7, fiber: 5, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Gluten" },
+  { name: "Peanut Butter Toast", type: "snacks", calorie_range: "250-320", calories: 290, protein: 12, carbs: 30, fats: 14, fiber: 4, vegetarian: "Yes", diabetic_friendly: "No", allergens: "Peanuts" },
+  { name: "Whole Wheat Toast + Egg", type: "snacks", calorie_range: "220-300", calories: 260, protein: 13, carbs: 28, fats: 10, fiber: 4, vegetarian: "No", diabetic_friendly: "No", allergens: "Gluten, Egg" },
+  { name: "Besan Chilla", type: "snacks", calorie_range: "180-240", calories: 210, protein: 10, carbs: 20, fats: 8, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Moong Chilla", type: "snacks", calorie_range: "160-220", calories: 190, protein: 12, carbs: 18, fats: 6, fiber: 5, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Vegetable Soup", type: "snacks", calorie_range: "80-120", calories: 100, protein: 4, carbs: 18, fats: 2, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Dal Soup", type: "snacks", calorie_range: "120-180", calories: 150, protein: 8, carbs: 22, fats: 3, fiber: 5, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Tomato Soup", type: "snacks", calorie_range: "90-130", calories: 110, protein: 3, carbs: 20, fats: 2, fiber: 4, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "" },
+  { name: "Buttermilk + Seeds", type: "snacks", calorie_range: "100-150", calories: 120, protein: 5, carbs: 10, fats: 4, fiber: 2, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Milk" },
+  { name: "Green Tea + Nuts", type: "snacks", calorie_range: "120-180", calories: 150, protein: 4, carbs: 8, fats: 10, fiber: 3, vegetarian: "Yes", diabetic_friendly: "Yes", allergens: "Nuts" }
+];
+
+const DESSERT_MEALS = [
+  { name: "Chhena + Nolen Gur (Fresh Paneer + Jaggery)", type: "dessert", calorie_range: "180-240", calories: 210, protein: 12, carbs: 18, fats: 9, fiber: 0, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Curd + Honey", type: "dessert", calorie_range: "150-200", calories: 170, protein: 7, carbs: 22, fats: 5, fiber: 0, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Fruit Chaat", type: "dessert", calorie_range: "80-120", calories: 100, protein: 2, carbs: 24, fats: 0, fiber: 5, vegetarian: "Yes", allergens: "None" },
+  { name: "Banana + Peanut", type: "dessert", calorie_range: "250-350", calories: 300, protein: 10, carbs: 35, fats: 14, fiber: 4, vegetarian: "Yes", allergens: "Peanuts" },
+  { name: "Gur + Muri", type: "dessert", calorie_range: "120-180", calories: 150, protein: 3, carbs: 32, fats: 1, fiber: 2, vegetarian: "Yes", allergens: "None" },
+  { name: "Boiled Sweet Potato + Gur", type: "dessert", calorie_range: "160-220", calories: 190, protein: 3, carbs: 40, fats: 1, fiber: 5, vegetarian: "Yes", allergens: "None" },
+  { name: "Apple + Peanut Butter", type: "dessert", calorie_range: "180-250", calories: 220, protein: 6, carbs: 25, fats: 12, fiber: 5, vegetarian: "Yes", allergens: "Peanuts" },
+  { name: "Dates + Milk", type: "dessert", calorie_range: "200-280", calories: 240, protein: 8, carbs: 35, fats: 6, fiber: 3, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Roasted Makhana + Gur", type: "dessert", calorie_range: "120-180", calories: 150, protein: 5, carbs: 18, fats: 5, fiber: 2, vegetarian: "Yes", allergens: "Nuts" },
+  { name: "Oats + Milk + Honey", type: "dessert", calorie_range: "200-280", calories: 240, protein: 9, carbs: 35, fats: 6, fiber: 5, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Chire + Milk + Dates", type: "dessert", calorie_range: "220-300", calories: 260, protein: 8, carbs: 45, fats: 5, fiber: 4, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Sattu + Gur + Milk", type: "dessert", calorie_range: "250-350", calories: 300, protein: 12, carbs: 40, fats: 8, fiber: 7, vegetarian: "Yes", allergens: "None" },
+  { name: "Sprouted Moong + Honey", type: "dessert", calorie_range: "150-210", calories: 180, protein: 9, carbs: 28, fats: 2, fiber: 7, vegetarian: "Yes", allergens: "None" },
+  { name: "Boiled Kala Chana + Gur", type: "dessert", calorie_range: "180-240", calories: 210, protein: 10, carbs: 35, fats: 2, fiber: 8, vegetarian: "Yes", allergens: "None" },
+  { name: "Papaya + Lemon + Honey", type: "dessert", calorie_range: "120-170", calories: 140, protein: 2, carbs: 30, fats: 0, fiber: 5, vegetarian: "Yes", allergens: "None" },
+  { name: "Guava + Black Salt + Honey", type: "dessert", calorie_range: "100-150", calories: 120, protein: 3, carbs: 22, fats: 1, fiber: 6, vegetarian: "Yes", allergens: "None" },
+  { name: "Pomegranate + Yogurt", type: "dessert", calorie_range: "150-200", calories: 180, protein: 6, carbs: 28, fats: 4, fiber: 3, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Mango + Chia", type: "dessert", calorie_range: "200-260", calories: 230, protein: 4, carbs: 35, fats: 8, fiber: 6, vegetarian: "Yes", allergens: "None" },
+  { name: "Banana + Yogurt + Honey", type: "dessert", calorie_range: "220-300", calories: 250, protein: 8, carbs: 38, fats: 5, fiber: 4, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Almond + Dates", type: "dessert", calorie_range: "200-280", calories: 240, protein: 7, carbs: 28, fats: 12, fiber: 5, vegetarian: "Yes", allergens: "Nuts" },
+  { name: "Peanut + Gur Ball", type: "dessert", calorie_range: "250-350", calories: 290, protein: 10, carbs: 30, fats: 15, fiber: 4, vegetarian: "Yes", allergens: "Peanuts" },
+  { name: "Til + Gur", type: "dessert", calorie_range: "200-260", calories: 230, protein: 7, carbs: 22, fats: 12, fiber: 6, vegetarian: "Yes", allergens: "Sesame" },
+  { name: "Coconut + Gur", type: "dessert", calorie_range: "250-330", calories: 290, protein: 4, carbs: 30, fats: 16, fiber: 5, vegetarian: "Yes", allergens: "None" },
+  { name: "Chia + Milk + Honey", type: "dessert", calorie_range: "200-260", calories: 230, protein: 8, carbs: 22, fats: 10, fiber: 7, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Flaxseed + Gur", type: "dessert", calorie_range: "180-240", calories: 210, protein: 6, carbs: 20, fats: 11, fiber: 7, vegetarian: "Yes", allergens: "None" },
+  { name: "Boiled Corn + Honey", type: "dessert", calorie_range: "180-240", calories: 210, protein: 6, carbs: 30, fats: 3, fiber: 4, vegetarian: "Yes", allergens: "None" },
+  { name: "Pumpkin + Gur", type: "dessert", calorie_range: "150-200", calories: 170, protein: 2, carbs: 35, fats: 0, fiber: 5, vegetarian: "Yes", allergens: "None" },
+  { name: "Lauki + Milk + Gur", type: "dessert", calorie_range: "160-220", calories: 190, protein: 6, carbs: 30, fats: 4, fiber: 4, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Chhena + Fruit Bowl", type: "dessert", calorie_range: "200-260", calories: 230, protein: 13, carbs: 20, fats: 10, fiber: 3, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Homemade Low Sugar Payesh", type: "dessert", calorie_range: "180-240", calories: 210, protein: 6, carbs: 30, fats: 6, fiber: 2, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Low Sugar Mishti Doi", type: "dessert", calorie_range: "150-220", calories: 190, protein: 7, carbs: 28, fats: 5, fiber: 0, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Dark Chocolate + Almond", type: "dessert", calorie_range: "200-260", calories: 230, protein: 6, carbs: 20, fats: 14, fiber: 4, vegetarian: "Yes", allergens: "Nuts" },
+  { name: "Cocoa + Banana", type: "dessert", calorie_range: "220-300", calories: 250, protein: 6, carbs: 38, fats: 8, fiber: 5, vegetarian: "Yes", allergens: "None" },
+  { name: "Golden Milk + Honey", type: "dessert", calorie_range: "150-200", calories: 170, protein: 7, carbs: 20, fats: 5, fiber: 0, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Almond Milk + Dates", type: "dessert", calorie_range: "180-240", calories: 210, protein: 6, carbs: 28, fats: 9, fiber: 4, vegetarian: "Yes", allergens: "Nuts" },
+  { name: "Chire + Banana + Honey", type: "dessert", calorie_range: "250-330", calories: 290, protein: 7, carbs: 50, fats: 5, fiber: 5, vegetarian: "Yes", allergens: "None" },
+  { name: "Chire + Yogurt + Fruit", type: "dessert", calorie_range: "220-280", calories: 250, protein: 9, carbs: 40, fats: 4, fiber: 5, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Sprouts + Banana", type: "dessert", calorie_range: "250-330", calories: 300, protein: 11, carbs: 45, fats: 3, fiber: 8, vegetarian: "Yes", allergens: "None" },
+  { name: "Mixed Sprouts + Honey", type: "dessert", calorie_range: "200-260", calories: 230, protein: 11, carbs: 32, fats: 3, fiber: 8, vegetarian: "Yes", allergens: "None" },
+  { name: "Banana + Sesame + Honey", type: "dessert", calorie_range: "220-300", calories: 250, protein: 7, carbs: 38, fats: 8, fiber: 6, vegetarian: "Yes", allergens: "Sesame" },
+  { name: "Coconut + Banana + Honey", type: "dessert", calorie_range: "260-340", calories: 300, protein: 5, carbs: 40, fats: 14, fiber: 6, vegetarian: "Yes", allergens: "None" },
+  { name: "Peanut + Cocoa + Dates", type: "dessert", calorie_range: "260-340", calories: 300, protein: 11, carbs: 32, fats: 15, fiber: 6, vegetarian: "Yes", allergens: "Peanuts" },
+  { name: "Oats + Cocoa + Milk", type: "dessert", calorie_range: "230-300", calories: 260, protein: 10, carbs: 40, fats: 7, fiber: 5, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Low Sugar Rasgulla (store-bought)", type: "dessert", calorie_range: "120-180", calories: 150, protein: 6, carbs: 20, fats: 4, fiber: 0, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Baked Sandesh (store-bought)", type: "dessert", calorie_range: "150-220", calories: 190, protein: 9, carbs: 18, fats: 8, fiber: 1, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Sugar-free Mishti Doi (store-bought)", type: "dessert", calorie_range: "130-180", calories: 160, protein: 7, carbs: 22, fats: 4, fiber: 0, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Protein Yogurt Dessert (store)", type: "dessert", calorie_range: "180-240", calories: 210, protein: 15, carbs: 20, fats: 6, fiber: 2, vegetarian: "Yes", allergens: "Milk" },
+  { name: "Date Ladoo (store)", type: "dessert", calorie_range: "200-260", calories: 230, protein: 4, carbs: 30, fats: 10, fiber: 4, vegetarian: "Yes", allergens: "Nuts" },
+  { name: "Peanut Chikki (low sugar store)", type: "dessert", calorie_range: "180-260", calories: 220, protein: 8, carbs: 20, fats: 12, fiber: 3, vegetarian: "Yes", allergens: "Peanuts" },
+  { name: "Til Ladoo (store)", type: "dessert", calorie_range: "200-260", calories: 230, protein: 7, carbs: 22, fats: 12, fiber: 5, vegetarian: "Yes", allergens: "Sesame" },
+];
+
+// ─── Build Food Database ──────────────────────────────────────────────────
+
+export function buildFoodDatabase() {
+  const foods = [];
+  let id = 0;
+
+  const mealMap = {
+    breakfast: BREAKFAST_MEALS,
+    lunch: LUNCH_MEALS,
+    dinner: DINNER_MEALS,
+    snacks: SNACKS_MEALS,
+    dessert: DESSERT_MEALS
+  };
+
+  Object.entries(mealMap).forEach(([mealType, meals]) => {
+    meals.forEach((meal) => {
+      id += 1;
+      // Determine category based on macros
+      let category = 'carb';
+      if (meal.protein > meal.carbs && meal.protein > meal.fats) {
+        category = 'protein';
+      } else if (meal.fats > meal.carbs && meal.fats > meal.protein) {
+        category = 'fat';
+      }
+
+      // Build tags based on data
+      const tags = [];
+      if (meal.vegetarian === 'Yes') tags.push('veg');
+      if (meal.diabetic_friendly === 'Yes') tags.push('diabetic-friendly');
+      if (meal.allergens) {
+        if (Array.isArray(meal.allergens)) {
+          meal.allergens.forEach(a => {
+            const trimmed = String(a).trim().toLowerCase();
+            if (trimmed) tags.push(trimmed);
+          });
+        } else if (typeof meal.allergens === "string") {
+          meal.allergens.split(',').forEach(a => {
+            const trimmed = a.trim().toLowerCase();
+            if (trimmed) tags.push(trimmed);
+          });
+        }
+      }
+      if (meal.fats <= 5) tags.push('low-fat');
+      if (meal.calories <= 100) tags.push('light');
+      if (meal.fiber >= 5) tags.push('high-fiber');
+      if (meal.protein >= 15) tags.push('protein-heavy');
+
+      foods.push({
+        id: `meal-${id}`,
+        name: meal.name,
+        category,
+        calories: meal.calories,
+        calorie_range: meal.calorie_range || null,
+        protein: meal.protein,
+        carbs: meal.carbs,
+        fats: meal.fats,
+        fiber: meal.fiber,
+        mealType: mealType,
+        tags,
+        vegetarian: meal.vegetarian === 'Yes',
+        diabeticFriendly: meal.diabetic_friendly === 'Yes'
+      });
+    });
+  });
+
+  return foods;
+}
+
+export const foodDatabase = buildFoodDatabase();
+
+// ─── Constants & Product Catalog ──────────────────────────────────────────
 
 export const PRODUCT_CATALOG = [
   {
     key:     "glucoamrit",
     name:    "Olilife GlucoAmrit",
-    benefit: "Advanced Ayurvedic herbal juice formulated to support healthy blood sugar levels — recommended for diabetic and pre-diabetic profiles.",
+    benefit: "Advanced Ayurvedic herbal juice for healthy blood sugar levels — for diabetic and pre-diabetic profiles.",
     link:    "https://olilife.in/product/olilife-glucoamrit-advanced-ayurvedic-herbal-wellness-juice/",
     image:   "https://olilife.in/wp-content/uploads/2026/01/web-site-glucoamrit-final-226x300.jpg"
   },
   {
     key:     "oliliv",
     name:    "Oliliv Juice",
-    benefit: "Ayurvedic herbal liver wellness juice — pairs best with detox-focused or low-fat meal plans to support natural cleansing.",
+    benefit: "Ayurvedic herbal liver wellness juice — pairs with detox-focused or low-fat meal plans.",
     link:    "https://olilife.in/product/oliliv-juice/",
     image:   "https://olilife.in/wp-content/uploads/2026/01/oliliv-creative-web-final-226x300.jpg"
   },
   {
     key:     "digestowell",
     name:    "Digestowell Syrup",
-    benefit: "Ayurvedic digestive care syrup — supports smoother digestion when your diet is high-fibre, protein-rich, or heavily spiced.",
+    benefit: "Ayurvedic digestive care for high-fibre, protein-rich, or spiced diets.",
     link:    "https://olilife.in/product/digestowell-syrup/",
     image:   "https://olilife.in/wp-content/uploads/2025/11/digestowel-dosage-web-final-226x300.jpg"
   },
   {
     key:     "laxonova",
     name:    "Laxonova Powder",
-    benefit: "Plant-based Ayurvedic digestive relief — ideal when your meal plan is protein-heavy or low in natural fibre.",
+    benefit: "Plant-based Ayurvedic digestive relief for protein-heavy or low-fibre meal plans.",
     link:    "https://olilife.in/product/laxonova/",
     image:   "https://olilife.in/wp-content/uploads/2025/11/laxonova-creative-web-final-226x300.jpg"
   },
   {
     key:     "painreliva",
     name:    "Pain Reliva Capsules",
-    benefit: "Ayurvedic joint and bone care — complements high-protein or weight-gain diets and supports an active lifestyle.",
+    benefit: "Ayurvedic joint and bone care for active lifestyles and weight-gain diets.",
     link:    "https://olilife.in/product/painreliva-capsule-ayurvedic-joint-pain-medicine/",
     image:   "https://olilife.in/wp-content/uploads/2025/11/pain-reliva-capsule-image-website-final-226x300.jpg"
   }
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+export const productCatalog = PRODUCT_CATALOG.map((p) => ({ ...p }));
+
+// ─── Helpers ──────────────────────────────────────────────────────────────
 
 function splitPipe(value) { return value.split("|").filter(Boolean); }
 export function round(value) { return Math.round(value); }
@@ -169,42 +511,7 @@ export function formatConditions(conditions) {
   return conditions.map(titleCase).join(", ");
 }
 
-export function createProductImage(label) {
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 220'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%231B5E20'/><stop offset='100%' stop-color='%234CAF50'/></linearGradient></defs><rect width='220' height='220' rx='34' fill='url(%23g)'/><circle cx='172' cy='48' r='34' fill='rgba(255,255,255,0.12)'/><circle cx='48' cy='178' r='44' fill='rgba(255,255,255,0.12)'/><text x='110' y='96' fill='%23F5F5DC' font-family='Arial, sans-serif' font-size='28' font-weight='700' text-anchor='middle'>Olilife</text><text x='110' y='138' fill='%23FFFFFF' font-family='Arial, sans-serif' font-size='24' text-anchor='middle'>${label}</text></svg>`;
-  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
-}
-
-// ─── Food database ────────────────────────────────────────────────────────────
-
-export function buildFoodDatabase() {
-  const foods = [];
-  let id = 0;
-  Object.keys(FOOD_SEEDS).forEach((category) => {
-    FOOD_SEEDS[category].forEach((seed) => {
-      splitPipe(seed[5]).forEach((mealType) => {
-        id += 1;
-        foods.push({
-          id: `${category}-${id}`,
-          name: seed[0],
-          category,
-          calories: seed[1],
-          protein: seed[2],
-          carbs: seed[3],
-          fats: seed[4],
-          mealType,
-          tags: splitPipe(seed[6])
-        });
-      });
-    });
-  });
-  return foods;
-}
-
-export const foodDatabase = buildFoodDatabase();
-
-export const productCatalog = PRODUCT_CATALOG.map((p) => ({ ...p }));
-
-// ─── Metrics ──────────────────────────────────────────────────────────────────
+// ─── Metrics ──────────────────────────────────────────────────────────────
 
 export function getHeightCm(height, heightUnit) {
   const value = Number(height);
@@ -249,18 +556,49 @@ export function calculateTargetCalories(tdee, goal) {
   return clamp(round(tdee + (GOAL_ADJUSTMENTS[goal] || 0)), 1200, 3500);
 }
 
+export function getGoalFromBMI(bmi) {
+  if (bmi < 18.5) return "weight-gain";
+  if (bmi < 25)   return "maintain";
+  return "weight-loss";
+}
+
 export function getMetrics(state) {
   const age = Number(state.age) || 0;
   const heightCm = getHeightCm(state.height, state.heightUnit);
   const weightKg = getWeightKg(state.weight);
+
+  // Step 1: Calculate BMI
   const bmi = calculateBMI(heightCm, weightKg);
   const bmiCategory = getBMICategory(bmi);
+
+  // Step 2: Calculate BMR
   const bmr = calculateBMR(age, state.gender, heightCm, weightKg);
-  const tdee = calculateTDEE(bmr, state.activityLevel);
-  const dailyCalories = calculateTargetCalories(tdee, state.goal);
-  const macroPercents = getMacroPercents(state.goal);
+
+  // Step 3: Calculate TDEE
+  const actKey = state.activityLevel === "active" ? "very_active" : state.activityLevel;
+  const tdee = calculateTDEE(bmr, actKey);
+
+  // Step 4: Decide Goal Automatically Using BMI
+  const goalFromBMI = getGoalFromBMI(bmi);
+  // Allow user override if explicitly set, but prioritize Step 4 logic
+  const goal = state.goal || goalFromBMI;
+
+  // Step 5: Define Base Calories (C)
+  // Step 5 defined C = TDEE +/- 400. 
+  // calculateTargetCalories handles GOAL_ADJUSTMENTS (±400)
+  const baseCalories = calculateTargetCalories(tdee, goal);
+
+  // Step 7: Add Dessert (Only for Weight Gain)
+  // If BMI < 18.5: Dessert = C * 0.05, Else: Dessert = 0
+  const dessertCalories = bmi < 18.5 ? round(baseCalories * 0.05) : 0;
+
+  // Total Intake = C + Dessert
+  const dailyCalories = baseCalories + dessertCalories;
+
+  const macroPercents = getMacroPercents(goal);
+
   return {
-    age, heightCm, weightKg, bmi, bmiCategory, bmr, tdee, dailyCalories, macroPercents,
+    age, heightCm, weightKg, bmi, bmiCategory, bmr, tdee, goal, baseCalories, dessertCalories, dailyCalories, macroPercents,
     macroTargets: {
       protein: round((dailyCalories * macroPercents.protein) / 4),
       carbs:   round((dailyCalories * macroPercents.carbs)   / 4),
@@ -269,11 +607,19 @@ export function getMetrics(state) {
   };
 }
 
-// ─── Allergy helpers ──────────────────────────────────────────────────────────
+// ─── Allergy helpers ──────────────────────────────────────────────────────
 
 export function getCustomAllergyTokens(customAllergy) {
   return (customAllergy || "").toLowerCase().split(",").map((t) => t.trim()).filter(Boolean);
 }
+
+const ALLERGY_MAP = {
+  dairy:   ["dairy", "milk", "cheese", "paneer", "curd", "yogurt", "ghee", "butter"],
+  nuts:    ["nut", "peanut", "cashew", "almond", "walnut", "pistachio", "makhana"],
+  seafood: ["seafood", "fish", "prawn", "shrimp", "crab", "rohu", "pomfret", "sardine", "hilsa"],
+  eggs:    ["egg"],
+  gluten:  ["gluten", "wheat", "flour", "maida", "sooji", "semolina", "rawa"]
+};
 
 export function getAllergySummary(state) {
   if (!state.hasAllergies) return "No allergies selected";
@@ -283,16 +629,39 @@ export function getAllergySummary(state) {
   return all.length ? all.join(", ") : "Allergies toggle on";
 }
 
-function filterByAllergies(food, state) {
-  if (!state.hasAllergies) return true;
-  const customTokens = getCustomAllergyTokens(state.customAllergy);
-  const allergySet = new Set(state.allergyList || []);
-  const name = food.name.toLowerCase();
-  if (food.tags.some((tag) => allergySet.has(tag))) return false;
-  return !customTokens.some((token) => name.includes(token) || food.tags.includes(token));
+function parseCalorieRange(rangeStr) {
+  if (!rangeStr) return { min: 0, max: 5000 };
+  const parts = String(rangeStr).split(/[-–—]/).map(p => parseInt(p.trim(), 10));
+  if (parts.length === 2) return { min: parts[0], max: parts[1] };
+  if (parts.length === 1) return { min: parts[0] - 50, max: parts[0] + 50 };
+  return { min: 0, max: 5000 };
 }
 
-// ─── Scoring ──────────────────────────────────────────────────────────────────
+function filterByAllergies(food, state) {
+  if (!state.hasAllergies) return true;
+  
+  const customTokens = getCustomAllergyTokens(state.customAllergy);
+  const selectedCommon = state.allergyList || [];
+  const name = food.name.toLowerCase();
+  const tags = food.tags || [];
+
+  // 1. Check Common Allergies (using Aliases)
+  for (const allergyKey of selectedCommon) {
+    const aliases = ALLERGY_MAP[allergyKey] || [allergyKey];
+    if (aliases.some(alias => name.includes(alias) || tags.some(t => t.includes(alias)))) {
+      return false;
+    }
+  }
+
+  // 2. Check Custom Allergies (Substring Match)
+  if (customTokens.some(token => name.includes(token) || tags.some(t => t.includes(token)))) {
+    return false;
+  }
+
+  return true;
+}
+
+// ─── Scoring ──────────────────────────────────────────────────────────────
 
 function getHardAvoidTags(conditions) {
   const tags = new Set();
@@ -315,41 +684,53 @@ function getCandidateScore(food, state) {
   const supportTags = getSupportTags(state.chronicConditions);
   const avoidTags   = getHardAvoidTags(state.chronicConditions);
   const isDiabetic  = state.diabeticStatus === "pre-diabetic" || state.diabeticStatus === "diabetic";
-  if (isDiabetic && food.tags.includes("high-sugar")) score -= 100;
+  
   if (food.tags.some((t) => avoidTags.has(t))) score -= 16;
   supportTags.forEach((t) => { if (food.tags.includes(t)) score += 3; });
   if (isDiabetic) {
     if (food.tags.includes("diabetic-friendly")) score += 4;
-    if (food.tags.includes("low-gi")) score += 3;
   }
   if (state.goal === "weight-loss") {
     if (food.tags.includes("low-fat"))    score += 2;
-    if (food.tags.includes("easy-digest")) score += 1;
     if (food.category === "protein")       score += food.protein / 5;
   }
   if (state.goal === "weight-gain") {
-    if (food.tags.includes("balanced-energy")) score += 3;
     score += food.calories / 90;
   }
   if (state.goal === "detox") {
-    if (food.tags.includes("detox-friendly")) score += 3;
-    if (food.tags.includes("easy-digest"))    score += 1.5;
-  }
-  if (state.goal === "energy") {
-    if (food.tags.includes("balanced-energy"))  score += 2;
-    if (food.tags.includes("anti-inflammatory")) score += 1.5;
+    if (food.tags.includes("high-fiber")) score += 2;
   }
   return score;
 }
 
-function getMealCandidates(category, mealType, state) {
-  const avoidTags = getHardAvoidTags(state.chronicConditions);
+function getMealCandidates(mealType, state) {
   const isDiabetic = state.diabeticStatus !== "non-diabetic";
-  let base = foodDatabase.filter((f) => f.category === category && f.mealType === mealType && filterByAllergies(f, state));
-  const diabeticSafe = base.filter((f) => !(isDiabetic && f.tags.includes("high-sugar")));
-  const filtered = diabeticSafe.filter((f) => !f.tags.some((t) => avoidTags.has(t)));
-  const pool = filtered.length >= 6 ? filtered : diabeticSafe;
-  return pool.map((f) => ({ ...f, _score: getCandidateScore(f, state) })).sort((a, b) => b._score - a._score || a.calories - b.calories);
+  const avoidTags = getHardAvoidTags(state.chronicConditions);
+  const dietPref = state.dietPreference || 'non-veg';
+
+  // 1. Basic filtering (meal type and allergies)
+  let candidates = foodDatabase.filter((f) => 
+    f.mealType === mealType && 
+    filterByAllergies(f, state)
+  );
+
+  // 2. Veg/Non-Veg Filter (PRIORITY)
+  if (dietPref === 'veg') {
+    candidates = candidates.filter(f => f.vegetarian);
+  }
+
+  // 3. Disease Filter (PRIORITY: Diabetic Friendly)
+  if (isDiabetic) {
+    candidates = candidates.filter(f => f.diabeticFriendly);
+  }
+
+  // 4. Chronic Condition Avoidance (PRIORITY)
+  candidates = candidates.filter(f => !f.tags.some(t => avoidTags.has(t)));
+
+  // 5. Score and sort by relevance
+  return candidates
+    .map((f) => ({ ...f, _score: getCandidateScore(f, state) }))
+    .sort((a, b) => b._score - a._score || a.calories - b.calories);
 }
 
 function rotateList(list, offset) {
@@ -385,35 +766,56 @@ function getMacroShare(calories, grams, divisor) {
 
 export function generateMealOption(config, seed, excludeSignatures, state) {
   const metrics = getMetrics(state);
-  const targetCalories = round(metrics.dailyCalories * config.percentage);
-  const proteins = rotateList(getMealCandidates("protein", config.key, state), seed).slice(0, 10);
-  const carbs    = rotateList(getMealCandidates("carb",    config.key, state), seed * 2 + 1).slice(0, 10);
-  const fats     = rotateList(getMealCandidates("fat",     config.key, state), seed * 3 + 2).slice(0, 10);
-  const macroGoal = getMacroPercents(state.goal);
-  let best = null;
-  proteins.forEach((protein) => {
-    carbs.forEach((carb) => {
-      fats.forEach((fat) => {
-        const signature = `${protein.id}|${carb.id}|${fat.id}`;
-        if (excludeSignatures.has(signature)) return;
-        const baseItems  = [protein, carb, fat];
-        const baseTotals = getMealTotals(baseItems);
-        const factor     = clamp(targetCalories / Math.max(baseTotals.calories, 1), 0.8, 2.2);
-        const items      = baseItems.map((i) => scaleFood(i, factor));
-        const totals     = getMealTotals(items);
-        const score =
-          (Math.abs(totals.calories - targetCalories) / Math.max(targetCalories, 1)) * 6 +
-          Math.abs(getMacroShare(totals.calories, totals.protein, 4) - macroGoal.protein) +
-          Math.abs(getMacroShare(totals.calories, totals.carbs,   4) - macroGoal.carbs)   +
-          Math.abs(getMacroShare(totals.calories, totals.fats,    9) - macroGoal.fats)    -
-          (protein._score + carb._score + fat._score) / 40;
-        if (!best || score < best.score) {
-          best = { mealType: config.key, label: config.label, targetCalories, items, signature, score };
-        }
-      });
-    });
+  const targetCalories = config.key === "dessert" 
+    ? metrics.dessertCalories 
+    : round(metrics.baseCalories * config.percentage);
+
+  if (targetCalories <= 0) return null;
+
+  const candidates = getMealCandidates(config.key, state);
+  const rotated = rotateList(candidates, seed);
+  
+  let bestInRange = null;
+  let bestFallback = null;
+
+  rotated.forEach((meal) => {
+    const signature = meal.id;
+    if (excludeSignatures.has(signature)) return;
+
+    const { min, max } = parseCalorieRange(meal.calorie_range);
+    const isInRange = targetCalories >= min && targetCalories <= max;
+
+    // Portions are scaled to match targetCalories precisely
+    // If in range, we stay very close to the natural portion size
+    const factor = clamp(targetCalories / Math.max(meal.calories, 1), 0.4, 2.5);
+    const scaled = scaleFood(meal, factor);
+    
+    // Scoring logic: preference for items naturally closer to the target range
+    const calorieDiffScore = Math.abs(scaled.calories - targetCalories) / targetCalories;
+    const diseaseScore = meal._score / 50; 
+    const finalScore = calorieDiffScore - diseaseScore;
+
+    const result = { 
+      mealType: config.key, 
+      label: config.label, 
+      targetCalories, 
+      items: [scaled], 
+      signature, 
+      score: finalScore 
+    };
+
+    if (isInRange) {
+      if (!bestInRange || finalScore < bestInRange.score) {
+        bestInRange = result;
+      }
+    } else {
+      if (!bestFallback || finalScore < bestFallback.score) {
+        bestFallback = result;
+      }
+    }
   });
-  return best;
+
+  return bestInRange || bestFallback;
 }
 
 export function generateDietPlan(state) {
@@ -434,7 +836,7 @@ export function getDietTotals(meals) {
 }
 
 export function getAlternativeItems(meal, currentItem) {
-  const scaled = getMealCandidates(currentItem.category, meal.mealType, {
+  const scaled = getMealCandidates(meal.mealType, {
     hasAllergies: false, allergyList: [], customAllergy: "", chronicConditions: [],
     diabeticStatus: "non-diabetic", goal: "maintain"
   });
@@ -445,7 +847,7 @@ export function getAlternativeItems(meal, currentItem) {
 }
 
 export function getAlternativeItemsForState(meal, currentItem, state) {
-  const scaled = getMealCandidates(currentItem.category, meal.mealType, state);
+  const scaled = getMealCandidates(meal.mealType, state);
   const factor = currentItem.portionFactor || 1;
   const candidates = scaled.filter((c) => c.id !== currentItem.baseId).map((c) => scaleFood(c, factor));
   const close = candidates.filter((c) => Math.abs(c.calories - currentItem.calories) <= currentItem.calories * 0.2);
@@ -467,39 +869,21 @@ export function getAlternativeMeals(meal, mealIndex, state) {
   return options;
 }
 
-// dietTotals = { calories, protein, carbs, fats } from the generated meal plan (optional)
 export function getProductRecommendations(state, dietTotals) {
   const { goal, chronicConditions = [], activityLevel, diabeticStatus } = state;
   const metrics   = getMetrics(state);
   const isDiabetic = diabeticStatus === "diabetic" || diabeticStatus === "pre-diabetic";
   const picks     = new Set();
 
-  // ── GlucoAmrit: ONLY for confirmed diabetic / pre-diabetic ───────────────────
   if (isDiabetic) picks.add("glucoamrit");
+  if (chronicConditions.includes("liver") || goal === "detox" || goal === "weight-loss" || chronicConditions.includes("kidney")) picks.add("oliliv");
+  if (chronicConditions.includes("digestive") || chronicConditions.includes("heart") || activityLevel === "sedentary") picks.add("digestowell");
+  if (goal === "weight-gain" || (dietTotals && dietTotals.protein > metrics.macroTargets.protein * 1.2)) picks.add("laxonova");
+  if (activityLevel === "active" || activityLevel === "moderate" || chronicConditions.includes("lung")) picks.add("painreliva");
 
-  // ── Oliliv Juice: liver condition, detox goal, weight-loss, kidney ───────────
-  if (chronicConditions.includes("liver"))                                   picks.add("oliliv");
-  if (goal === "detox" || goal === "weight-loss")                            picks.add("oliliv");
-  if (chronicConditions.includes("kidney"))                                  picks.add("oliliv");
-
-  // ── Digestowell Syrup: digestive condition, heart condition, sedentary ───────
-  if (chronicConditions.includes("digestive"))                               picks.add("digestowell");
-  if (chronicConditions.includes("heart"))                                   picks.add("digestowell");
-  // Sedentary lifestyle slows digestion
-  if (activityLevel === "sedentary")                                         picks.add("digestowell");
-
-  // ── Laxonova: weight-gain (dense diet), high-protein diet from plan ──────────
-  if (goal === "weight-gain")                                                picks.add("laxonova");
-  if (dietTotals && dietTotals.protein > metrics.macroTargets.protein * 1.2) picks.add("laxonova");
-
-  // ── Pain Reliva: active users, lung condition, maintain goal ─────────────────
-  if (activityLevel === "active" || activityLevel === "moderate")            picks.add("painreliva");
-  if (chronicConditions.includes("lung"))                                    picks.add("painreliva");
-
-  // ── Goal fallbacks when nothing matched yet ───────────────────────────────────
-  if (!picks.size && goal === "energy")   picks.add("digestowell");
+  if (!picks.size && goal === "energy") picks.add("digestowell");
   if (!picks.size && goal === "maintain") picks.add("digestowell");
-  if (!picks.size)                        picks.add("oliliv");
+  if (!picks.size) picks.add("oliliv");
 
   return [...picks]
     .map((key) => productCatalog.find((p) => p.key === key))
@@ -513,7 +897,7 @@ export function getPersonalizedTips(state, metrics) {
   if (state.goal === "weight-gain") tips.push("Aim for steady meal timing and do not skip snacks so the calorie surplus feels manageable.");
   if (state.goal === "detox") tips.push("Favor lighter cooking styles, warm fluids, and easy-to-digest combinations to support a reset phase.");
   if (state.goal === "energy") tips.push("Anchor meals with steady carbs and protein to avoid sharp energy dips later in the day.");
-  if (state.diabeticStatus === "diabetic" || state.diabeticStatus === "pre-diabetic") tips.push("Low-GI carbs and evenly spaced meals can help keep energy steadier across the day.");
+  if ((state.diabeticStatus === "diabetic" || state.diabeticStatus === "pre-diabetic")) tips.push("Low-GI meals and evenly spaced meals can help keep energy steadier across the day.");
   if ((state.chronicConditions || []).includes("digestive")) tips.push("Gentle, lower-spice meals and simpler pairings usually sit better when digestion needs extra support.");
   if ((state.chronicConditions || []).includes("heart")) tips.push("Choose lower-sodium meals and leaner fat sources more often to keep the plan heart-aware.");
   if ((state.chronicConditions || []).includes("liver")) tips.push("A lighter fat load and more detox-friendly dishes keep the plan aligned with liver support.");

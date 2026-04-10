@@ -1,20 +1,16 @@
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
+import ProductCarousel from "../shared/ProductCarousel";
 
 export default function WelcomeScreen({ onNext, onShowSignup, onShowLogin }) {
   const { isLoggedIn, user } = useAuth();
+
   return (
     <article className="screen active" aria-labelledby="welcomeTitle">
-      <div className="wellness-visual">
-        <div className="leaf-cluster">
-          <div className="leaf-row"><span className="leaf" /><span className="leaf small" /></div>
-          <div className="visual-copy">
-            <strong>Ayurvedic wellness</strong>
-            Personalized guidance that feels calm, intentional, and made for your body.
-          </div>
-          <div className="leaf-row"><span className="leaf small" /><span className="leaf" /></div>
-        </div>
+      <div className="wellness-visual" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <ProductCarousel variant="hero" />
       </div>
+      
       <div className="hero-card">
         <span className="hero-badge">Your wellness reset</span>
         <h1 className="hero-title" id="welcomeTitle">Build your Olilife plan.</h1>
@@ -22,6 +18,7 @@ export default function WelcomeScreen({ onNext, onShowSignup, onShowLogin }) {
           Answer a few quick questions and we will shape a premium wellness path around your body profile and daily rhythm.
         </p>
       </div>
+
       {isLoggedIn ? (
         <div className="footer-actions single">
           <button className="btn btn-primary" type="button" onClick={onNext}>

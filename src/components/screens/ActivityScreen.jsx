@@ -1,19 +1,16 @@
 import React from "react";
 
 const ACTIVITIES = [
-  { key: "sedentary", label: "Sedentary",  desc: "Mostly desk-based with minimal daily movement." },
-  { key: "light",     label: "Light",      desc: "Short walks or light movement a few times a week." },
-  { key: "moderate",  label: "Moderate",   desc: "Regular workouts or a fairly active routine." },
-  { key: "active",    label: "Active",     desc: "Frequent exercise, training, or high daily movement." }
+  { key: "sedentary",   label: "Sedentary",   desc: "Mostly desk-based with minimal daily movement." },
+  { key: "light",       label: "Light",       desc: "Short walks or light movement a few times a week." },
+  { key: "moderate",    label: "Moderate",    desc: "Regular workouts or a fairly active routine." },
+  { key: "very_active", label: "Very Active", desc: "Frequent exercise, training, or high daily movement." }
 ];
 
 export default function ActivityScreen({ state, onChange, onNext, onBack, canAdvance }) {
   return (
     <article className="screen active" aria-labelledby="activityTitle">
-      <div className="panel-card">
-        <h2 className="panel-title" id="activityTitle">How active are you most days?</h2>
-        <p className="panel-copy">Choose the option that feels closest to your usual weekly rhythm.</p>
-      </div>
+      <h2 className="panel-title" id="activityTitle" style={{ marginBottom: "8px" }}>How active are you most days?</h2>
       <div className="panel-card field-group">
         <div className="field-label">Activity level</div>
         <div className="option-grid" role="group" aria-label="Select your activity level">
