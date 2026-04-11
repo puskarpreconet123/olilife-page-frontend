@@ -1,11 +1,11 @@
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 export const MEAL_CONFIGS = [
-  { key: "breakfast", label: "Breakfast", percentage: 0.30 },
-  { key: "lunch",     label: "Lunch",     percentage: 0.35 },
-  { key: "dinner",    label: "Dinner",    percentage: 0.25 },
-  { key: "snacks",    label: "Snacks",    percentage: 0.10 },
-  { key: "dessert",   label: "Dessert",   percentage: 0.05 } // Percentage of base C
+  { key: "breakfast", label: "Breakfast", percentage: 0.30, macroShare: 0.25 },
+  { key: "lunch",     label: "Lunch",     percentage: 0.35, macroShare: 0.30 },
+  { key: "dinner",    label: "Dinner",    percentage: 0.25, macroShare: 0.25 },
+  { key: "snacks",    label: "Snacks",    percentage: 0.10, macroShare: 0.20 },
+  { key: "dessert",   label: "Dessert",   percentage: 0.05, macroShare: 0    } // Percentage of base C
 ];
 
 export const ACTIVITY_MULTIPLIERS = {
@@ -24,13 +24,6 @@ export const GOAL_ADJUSTMENTS = {
   energy:           0
 };
 
-export const MACRO_TARGETS_BY_GOAL = {
-  "weight-loss": { protein: 0.4, carbs: 0.3, fats: 0.3 },
-  "weight-gain": { protein: 0.3, carbs: 0.5, fats: 0.2 },
-  maintain:      { protein: 0.3, carbs: 0.4, fats: 0.3 },
-  detox:         { protein: 0.3, carbs: 0.4, fats: 0.3 },
-  energy:        { protein: 0.3, carbs: 0.4, fats: 0.3 }
-};
 
 export const CONDITION_PREFERENCES = {
   liver:      { support: ["detox-friendly", "low-fat"],             avoid: ["high-fat", "fried"] },
@@ -491,8 +484,7 @@ export const PRODUCT_CATALOG = [
 export const productCatalog = PRODUCT_CATALOG.map((p) => ({ ...p }));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
-
-function splitPipe(value) { return value.split("|").filter(Boolean); }
+ 
 export function round(value) { return Math.round(value); }
 export function roundOne(value) { return Math.round(value * 10) / 10; }
 export function clamp(value, min, max) { return Math.min(Math.max(value, min), max); }
@@ -524,8 +516,134 @@ export function getWeightKg(weight) {
   return Number.isFinite(value) && value > 0 ? value : 0;
 }
 
-export function getMacroPercents(goal) {
-  return MACRO_TARGETS_BY_GOAL[goal] || MACRO_TARGETS_BY_GOAL.maintain;
+
+// ─── g/kg Research-Backed Macro Targets ───────────────────────────────────
+const MACRO_GRAMS_PER_KG = {
+  "weight-loss": { proteinPerKg: 1.4, fatPerKg: 0.8 },
+  // High protein → preserve muscle during deficit
+  // Lower fat → create room for carbs, reduce calories
+
+  "weight-gain": { proteinPerKg: 1.8, fatPerKg: 1.0 },
+  // Moderate protein → build muscle (not excess)
+  // Moderate fat → hormones, testosterone, recovery
+
+  "maintain":    { proteinPerKg: 1.2, fatPerKg: 0.9 },
+  // Balanced — just sustain current body composition
+
+  "detox":       { proteinPerKg: 1.1, fatPerKg: 0.7 },
+  // Lower protein → less liver load
+  // Lower fat → easier digestion
+  // More carbs (from fiber-rich foods) → cleansing
+
+  "energy":      { proteinPerKg: 1.3, fatPerKg: 0.9 },
+  // Moderate protein → sustained energy
+  // Carbs fill the rest → primary fuel source
+};
+
+// ─── Condition-Based Adjustments ──────────────────────────────────────────
+
+const CONDITION_MACRO_ADJUSTMENTS = {
+  kidney:     { proteinPerKgDelta: -0.4, fatPerKgDelta:  0.0 },
+  // Kidney disease → significantly reduce protein
+  // Excess protein = more urea = kidney strain
+
+  liver:      { proteinPerKgDelta: -0.2, fatPerKgDelta: -0.1 },
+  // Liver disease → moderate protein reduction
+  // Lower fat → less burden on bile production
+
+  heart:      { proteinPerKgDelta:  0.0, fatPerKgDelta: -0.2 },
+  // Heart → reduce fat (esp. saturated)
+  // Protein stays same
+
+  digestive:  { proteinPerKgDelta: -0.1, fatPerKgDelta: -0.1 },
+  // Digestive issues → slightly reduce both
+  // Easier to process
+
+  lung:       { proteinPerKgDelta:  0.1, fatPerKgDelta:  0.0 },
+  // Lung conditions → slightly more protein
+  // Supports respiratory muscle strength
+
+  thyroid:    { proteinPerKgDelta:  0.0, fatPerKgDelta:  0.0 },
+  // Thyroid → no macro change, just food quality matters
+};
+
+// ─── Diabetic Adjustment ──────────────────────────────────────────────────
+
+// For diabetic/pre-diabetic: reduce carbs, increase protein slightly
+// Carbs cause blood sugar spikes → need to be controlled
+const DIABETIC_ADJUSTMENT = {
+  proteinPerKgDelta: +0.2,  // More protein → better satiety, less glucose spike
+  fatPerKgDelta:     +0.1,  // Slightly more fat → slows glucose absorption
+};
+
+// ─── Core Macro Calculator (replaces getMacroPercents) ────────────────────
+
+export function calculateMacroTargets(weightKg, targetCalories, goal, chronicConditions = [], diabeticStatus = "non-diabetic") {
+  // Step 1: Base g/kg from goal
+  const base = MACRO_GRAMS_PER_KG[goal] || MACRO_GRAMS_PER_KG["maintain"];
+  let proteinPerKg = base.proteinPerKg;
+  let fatPerKg     = base.fatPerKg;
+
+  // Step 2: Multi-condition safe merge
+  const activeConditions = (chronicConditions || [])
+    .filter(c => c !== "none" && CONDITION_MACRO_ADJUSTMENTS[c]);
+
+  if (activeConditions.length > 0) {
+    const proteinDeltas = activeConditions.map(c => CONDITION_MACRO_ADJUSTMENTS[c].proteinPerKgDelta);
+    const fatDeltas     = activeConditions.map(c => CONDITION_MACRO_ADJUSTMENTS[c].fatPerKgDelta);
+
+    const proteinReductions = proteinDeltas.filter(d => d < 0);
+    const proteinBoosts     = proteinDeltas.filter(d => d > 0);
+    const fatReductions     = fatDeltas.filter(d => d < 0);
+    const fatBoosts         = fatDeltas.filter(d => d > 0);
+
+    // Reductions always win — most conservative reduction applied
+    // Boosts only apply when no condition restricts that macro
+    if (proteinReductions.length > 0) {
+      proteinPerKg += Math.min(...proteinReductions);
+    } else if (proteinBoosts.length > 0) {
+      proteinPerKg += Math.max(...proteinBoosts);
+    }
+
+    if (fatReductions.length > 0) {
+      fatPerKg += Math.min(...fatReductions);
+    } else if (fatBoosts.length > 0) {
+      fatPerKg += Math.max(...fatBoosts);
+    }
+  }
+
+  // Step 3: Diabetic adjustment
+  if (diabeticStatus === "diabetic" || diabeticStatus === "pre-diabetic") {
+    proteinPerKg += DIABETIC_ADJUSTMENT.proteinPerKgDelta;
+    fatPerKg     += DIABETIC_ADJUSTMENT.fatPerKgDelta;
+  }
+
+  // Step 4: Safety clamps
+  proteinPerKg = clamp(proteinPerKg, 0.8, 2.5);
+  fatPerKg     = clamp(fatPerKg,     0.5, 1.5);
+
+  // Step 5: Calculate grams
+  const proteinG    = round(weightKg * proteinPerKg);
+  const fatG        = round(weightKg * fatPerKg);
+
+  // Step 6: Carbs = remaining calories
+  const proteinKcal = proteinG * 4;
+  const fatKcal     = fatG * 9;
+  const carbsG      = round(Math.max(targetCalories - proteinKcal - fatKcal, 0) / 4);
+
+  // Step 7: % for backward compatibility
+  const protein = proteinKcal / targetCalories;
+  const fats    = fatKcal     / targetCalories;
+  const carbs   = (carbsG * 4) / targetCalories;
+
+  return {
+    proteinG, carbsG, fatG,
+    proteinPerKg: roundOne(proteinPerKg),
+    fatPerKg:     roundOne(fatPerKg),
+    protein: roundOne(protein),
+    carbs:   roundOne(carbs),
+    fats:    roundOne(fats),
+  };
 }
 
 export function calculateBMI(heightCm, weightKg) {
@@ -563,46 +681,52 @@ export function getGoalFromBMI(bmi) {
 }
 
 export function getMetrics(state) {
-  const age = Number(state.age) || 0;
+  const age      = Number(state.age) || 0;
   const heightCm = getHeightCm(state.height, state.heightUnit);
   const weightKg = getWeightKg(state.weight);
 
-  // Step 1: Calculate BMI
-  const bmi = calculateBMI(heightCm, weightKg);
+  const bmi         = calculateBMI(heightCm, weightKg);
   const bmiCategory = getBMICategory(bmi);
-
-  // Step 2: Calculate BMR
-  const bmr = calculateBMR(age, state.gender, heightCm, weightKg);
-
-  // Step 3: Calculate TDEE
-  const actKey = state.activityLevel === "active" ? "very_active" : state.activityLevel;
-  const tdee = calculateTDEE(bmr, actKey);
-
-  // Step 4: Decide Goal Automatically Using BMI
+  const bmr         = calculateBMR(age, state.gender, heightCm, weightKg);
+  const actKey      = state.activityLevel === "active" ? "very_active" : state.activityLevel;
+  const tdee        = calculateTDEE(bmr, actKey);
   const goalFromBMI = getGoalFromBMI(bmi);
-  // Allow user override if explicitly set, but prioritize Step 4 logic
-  const goal = state.goal || goalFromBMI;
-
-  // Step 5: Define Base Calories (C)
-  // Step 5 defined C = TDEE +/- 400. 
-  // calculateTargetCalories handles GOAL_ADJUSTMENTS (±400)
-  const baseCalories = calculateTargetCalories(tdee, goal);
-
-  // Step 7: Add Dessert (Only for Weight Gain)
-  // If BMI < 18.5: Dessert = C * 0.05, Else: Dessert = 0
+  const goal        = state.goal || goalFromBMI;
+  const baseCalories    = calculateTargetCalories(tdee, goal);
   const dessertCalories = bmi < 18.5 ? round(baseCalories * 0.05) : 0;
+  const dailyCalories   = baseCalories + dessertCalories;
 
-  // Total Intake = C + Dessert
-  const dailyCalories = baseCalories + dessertCalories;
-
-  const macroPercents = getMacroPercents(goal);
+  // ✅ NEW: Use g/kg method instead of fixed %
+  const macroTargets = calculateMacroTargets(
+    weightKg,
+    dailyCalories,
+    goal,
+    state.chronicConditions || [],
+    state.diabeticStatus || "non-diabetic"
+  );
 
   return {
-    age, heightCm, weightKg, bmi, bmiCategory, bmr, tdee, goal, baseCalories, dessertCalories, dailyCalories, macroPercents,
+    age, heightCm, weightKg, bmi, bmiCategory, bmr, tdee,
+    goal, baseCalories, dessertCalories, dailyCalories,
+
+    // Keep macroPercents for backward compat (used in getMacroPercents calls)
+    macroPercents: {
+      protein: macroTargets.protein,
+      carbs:   macroTargets.carbs,
+      fats:    macroTargets.fats,
+    },
+
+    // ✅ Actual gram targets now personalized
     macroTargets: {
-      protein: round((dailyCalories * macroPercents.protein) / 4),
-      carbs:   round((dailyCalories * macroPercents.carbs)   / 4),
-      fats:    round((dailyCalories * macroPercents.fats)    / 9)
+      protein: macroTargets.proteinG,
+      carbs:   macroTargets.carbsG,
+      fats:    macroTargets.fatG,
+    },
+
+    // ✅ Extra insight for UI display
+    macroPerKg: {
+      protein: macroTargets.proteinPerKg,
+      fat:     macroTargets.fatPerKg,
     }
   };
 }
@@ -679,32 +803,51 @@ function getSupportTags(conditions) {
   return tags;
 }
 
-function getCandidateScore(food, state) {
+function getCandidateScore(food, state, metrics) {
   let score = 0;
   const supportTags = getSupportTags(state.chronicConditions);
   const avoidTags   = getHardAvoidTags(state.chronicConditions);
   const isDiabetic  = state.diabeticStatus === "pre-diabetic" || state.diabeticStatus === "diabetic";
-  
+
+  // Hard avoidance — highest priority
   if (food.tags.some((t) => avoidTags.has(t))) score -= 16;
+
+  // Condition support tags
   supportTags.forEach((t) => { if (food.tags.includes(t)) score += 3; });
-  if (isDiabetic) {
-    if (food.tags.includes("diabetic-friendly")) score += 4;
-  }
-  if (state.goal === "weight-loss") {
-    if (food.tags.includes("low-fat"))    score += 2;
-    if (food.category === "protein")       score += food.protein / 5;
-  }
-  if (state.goal === "weight-gain") {
-    score += food.calories / 90;
-  }
-  if (state.goal === "detox") {
-    if (food.tags.includes("high-fiber")) score += 2;
-  }
+
+  // Diabetic friendly bonus
+  if (isDiabetic && food.tags.includes("diabetic-friendly")) score += 4;
+
+  // Macro ratio alignment — calorie-based (protein/carbs = 4 kcal/g, fats = 9 kcal/g)
+  // Gram-based ratios are wrong because 1g fat ≠ 1g protein in energy contribution
+  const targets   = metrics.macroTargets;
+  const dailyCals = Math.max(metrics.dailyCalories, 1);
+  const foodCals  = Math.max(food.calories, 1);
+
+  const tProteinPct = (targets.protein * 4) / dailyCals;
+  const tCarbsPct   = (targets.carbs   * 4) / dailyCals;
+  const tFatsPct    = (targets.fats    * 9) / dailyCals;
+
+  const fProteinPct = (food.protein * 4) / foodCals;
+  const fCarbsPct   = (food.carbs   * 4) / foodCals;
+  const fFatsPct    = (food.fats    * 9) / foodCals;
+
+  // totalDiff: 0 (perfect) to ~2 (worst). Convert to 0–6 score.
+  const totalDiff = Math.abs(fProteinPct - tProteinPct) +
+                    Math.abs(fCarbsPct   - tCarbsPct)   +
+                    Math.abs(fFatsPct    - tFatsPct);
+  score += Math.max(0, (1 - totalDiff / 2) * 6);
+
+  // Goal-specific bonuses
+  if (state.goal === "detox"       && food.tags.includes("high-fiber")) score += 2;
+  if (state.goal === "weight-loss" && food.tags.includes("low-fat"))    score += 1;
+  if (state.goal === "weight-gain" && food.calories >= 400)              score += 1;
+
   return score;
 }
 
-function getMealCandidates(mealType, state) {
-  const isDiabetic = state.diabeticStatus !== "non-diabetic";
+function getMealCandidates(mealType, state, metrics) {
+  const isDiabetic = state.diabeticStatus === "diabetic" || state.diabeticStatus === "pre-diabetic";
   const avoidTags = getHardAvoidTags(state.chronicConditions);
   const dietPref = state.dietPreference || 'non-veg';
 
@@ -729,7 +872,7 @@ function getMealCandidates(mealType, state) {
 
   // 5. Score and sort by relevance
   return candidates
-    .map((f) => ({ ...f, _score: getCandidateScore(f, state) }))
+    .map((f) => ({ ...f, _score: getCandidateScore(f, state, metrics) }))
     .sort((a, b) => b._score - a._score || a.calories - b.calories);
 }
 
@@ -740,14 +883,18 @@ function rotateList(list, offset) {
 }
 
 function scaleFood(food, factor) {
+  const protein = roundOne(food.protein * factor);
+  const carbs   = roundOne(food.carbs   * factor);
+  const fats    = roundOne(food.fats    * factor);
   return {
     ...food,
     baseId:        food.id,
     portionFactor: roundOne(factor),
-    calories:      round(food.calories * factor),
-    protein:       roundOne(food.protein * factor),
-    carbs:         roundOne(food.carbs * factor),
-    fats:          roundOne(food.fats * factor)
+    protein,
+    carbs,
+    fats,
+    // Derive calories from scaled macros to avoid rounding drift
+    calories:      round(protein * 4 + carbs * 4 + fats * 9),
   };
 }
 
@@ -760,23 +907,24 @@ export function getMealTotals(items) {
   }), { calories: 0, protein: 0, carbs: 0, fats: 0 });
 }
 
-function getMacroShare(calories, grams, divisor) {
-  return calories ? (grams * divisor) / calories : 0;
-}
-
 export function generateMealOption(config, seed, excludeSignatures, state) {
   const metrics = getMetrics(state);
-  const targetCalories = config.key === "dessert" 
-    ? metrics.dessertCalories 
+  const targetCalories = config.key === "dessert"
+    ? metrics.dessertCalories
     : round(metrics.baseCalories * config.percentage);
 
   if (targetCalories <= 0) return null;
 
-  const candidates = getMealCandidates(config.key, state);
+  // Per-slot macro gram targets from the reference card macroShare
+  const share = config.macroShare || 0;
+  const slotProtein = metrics.macroTargets.protein * share;
+  const slotCarbs   = metrics.macroTargets.carbs   * share;
+  const slotFats    = metrics.macroTargets.fats    * share;
+
+  const candidates = getMealCandidates(config.key, state, metrics);
   const rotated = rotateList(candidates, seed);
-  
-  let bestInRange = null;
-  let bestFallback = null;
+
+  let best = null;
 
   rotated.forEach((meal) => {
     const signature = meal.id;
@@ -785,45 +933,129 @@ export function generateMealOption(config, seed, excludeSignatures, state) {
     const { min, max } = parseCalorieRange(meal.calorie_range);
     const isInRange = targetCalories >= min && targetCalories <= max;
 
-    // Portions are scaled to match targetCalories precisely
-    // If in range, we stay very close to the natural portion size
     const factor = clamp(targetCalories / Math.max(meal.calories, 1), 0.4, 2.5);
     const scaled = scaleFood(meal, factor);
-    
-    // Scoring logic: preference for items naturally closer to the target range
-    const calorieDiffScore = Math.abs(scaled.calories - targetCalories) / targetCalories;
-    const diseaseScore = meal._score / 50; 
-    const finalScore = calorieDiffScore - diseaseScore;
 
-    const result = { 
-      mealType: config.key, 
-      label: config.label, 
-      targetCalories, 
-      items: [scaled], 
-      signature, 
-      score: finalScore 
+    // calorieDiffScore: only meaningful when factor hits the clamp boundary
+    const calorieDiffScore = Math.abs(scaled.calories - targetCalories) / Math.max(targetCalories, 1);
+
+    // Macro gram match: avg relative diff vs per-slot gram targets
+    const macroScore = share > 0
+      ? (
+          Math.abs(scaled.protein - slotProtein) / Math.max(slotProtein, 1) +
+          Math.abs(scaled.carbs   - slotCarbs)   / Math.max(slotCarbs,   1) +
+          Math.abs(scaled.fats    - slotFats)    / Math.max(slotFats,    1)
+        ) / 3
+      : 0;
+
+    // In-range bonus: prefer meals in the natural calorie range, but macros can override
+    const rangeBonus = isInRange ? -0.15 : 0;
+
+    const diseaseScore = meal._score / 50;
+    const finalScore = calorieDiffScore * 0.2 + macroScore * 0.65 + rangeBonus - diseaseScore;
+
+    const result = {
+      mealType: config.key,
+      label: config.label,
+      targetCalories,
+      items: [scaled],
+      signature,
+      score: finalScore
     };
 
-    if (isInRange) {
-      if (!bestInRange || finalScore < bestInRange.score) {
-        bestInRange = result;
-      }
-    } else {
-      if (!bestFallback || finalScore < bestFallback.score) {
-        bestFallback = result;
-      }
-    }
+    if (!best || finalScore < best.score) best = result;
   });
 
-  return bestInRange || bestFallback;
+  return best;
+}
+
+// Average relative deviation of actual vs target macros (0 = perfect, 1 = 100% off each macro)
+function getMacroDeviation(actual, targets) {
+  return (
+    Math.abs(actual.protein - targets.protein) / Math.max(targets.protein, 1) +
+    Math.abs(actual.carbs   - targets.carbs)   / Math.max(targets.carbs,   1) +
+    Math.abs(actual.fats    - targets.fats)    / Math.max(targets.fats,    1)
+  ) / 3;
 }
 
 export function generateDietPlan(state) {
+  const metrics = getMetrics(state);
   const meals = [];
+
   MEAL_CONFIGS.forEach((config, index) => {
     const meal = generateMealOption(config, index + 1, new Set(), state);
     if (meal) meals.push(meal);
   });
+
+  // Post-generation: for each slot that misses its macro target by >20%,
+  // try alternate seeds to find a better meal
+  meals.forEach((meal, i) => {
+    const config = MEAL_CONFIGS.find(c => c.key === meal.mealType);
+    if (!config || !config.macroShare) return;
+
+    const share = config.macroShare;
+    const slotTargets = {
+      protein: metrics.macroTargets.protein * share,
+      carbs:   metrics.macroTargets.carbs   * share,
+      fats:    metrics.macroTargets.fats    * share,
+    };
+
+    let currentDev = getMacroDeviation(getMealTotals(meal.items), slotTargets);
+    if (currentDev <= 0.20) return;
+
+    const triedSigs = new Set([meal.signature]);
+    for (let seed = 10; seed <= 30; seed++) {
+      const alt = generateMealOption(config, seed, triedSigs, state);
+      if (!alt) continue;
+      const altDev = getMacroDeviation(getMealTotals(alt.items), slotTargets);
+      if (altDev < currentDev * 0.9) {
+        meals[i] = alt;
+        currentDev = altDev;
+      }
+      triedSigs.add(alt.signature);
+    }
+  });
+
+  // Final daily totals check: if any macro is still >15% short, swap the
+  // meal slot most responsible for that shortfall (seeds 31–50)
+  const totals = getDietTotals(meals);
+  const dailyTargets = metrics.macroTargets;
+  const gaps = [
+    { macro: "protein", gap: (totals.protein - dailyTargets.protein) / Math.max(dailyTargets.protein, 1) },
+    { macro: "carbs",   gap: (totals.carbs   - dailyTargets.carbs)   / Math.max(dailyTargets.carbs,   1) },
+    { macro: "fats",    gap: (totals.fats    - dailyTargets.fats)    / Math.max(dailyTargets.fats,    1) },
+  ];
+  const worstGap = gaps.sort((a, b) => a.gap - b.gap)[0];
+
+  if (worstGap.gap < -0.15) {
+    const macro = worstGap.macro;
+    // Find the slot delivering the lowest fraction of its macro share target
+    let worstI = -1, worstRatio = Infinity;
+    meals.forEach((meal, i) => {
+      const config = MEAL_CONFIGS.find(c => c.key === meal.mealType);
+      if (!config?.macroShare) return;
+      const slotTarget = dailyTargets[macro] * config.macroShare;
+      const slotActual = getMealTotals(meal.items)[macro];
+      const ratio = slotActual / Math.max(slotTarget, 1);
+      if (ratio < worstRatio) { worstRatio = ratio; worstI = i; }
+    });
+
+    if (worstI >= 0) {
+      const config = MEAL_CONFIGS.find(c => c.key === meals[worstI].mealType);
+      const triedSigs = new Set([meals[worstI].signature]);
+      const currentMacro = getMealTotals(meals[worstI].items)[macro];
+      for (let seed = 31; seed <= 50; seed++) {
+        const alt = generateMealOption(config, seed, triedSigs, state);
+        if (!alt) continue;
+        if (getMealTotals(alt.items)[macro] > currentMacro * 1.1) {
+          meals[worstI] = alt;
+          break;
+        }
+        triedSigs.add(alt.signature);
+      }
+    }
+  }
+
   return meals;
 }
 
@@ -836,10 +1068,8 @@ export function getDietTotals(meals) {
 }
 
 export function getAlternativeItems(meal, currentItem) {
-  const scaled = getMealCandidates(meal.mealType, {
-    hasAllergies: false, allergyList: [], customAllergy: "", chronicConditions: [],
-    diabeticStatus: "non-diabetic", goal: "maintain"
-  });
+  const stubState = { hasAllergies: false, allergyList: [], customAllergy: "", chronicConditions: [], diabeticStatus: "non-diabetic", goal: "maintain" };
+  const scaled = getMealCandidates(meal.mealType, stubState, getMetrics(stubState));
   const factor = currentItem.portionFactor || 1;
   const candidates = scaled.filter((c) => c.id !== currentItem.baseId).map((c) => scaleFood(c, factor));
   const close = candidates.filter((c) => Math.abs(c.calories - currentItem.calories) <= currentItem.calories * 0.2);
@@ -847,7 +1077,7 @@ export function getAlternativeItems(meal, currentItem) {
 }
 
 export function getAlternativeItemsForState(meal, currentItem, state) {
-  const scaled = getMealCandidates(meal.mealType, state);
+  const scaled = getMealCandidates(meal.mealType, state, getMetrics(state));
   const factor = currentItem.portionFactor || 1;
   const candidates = scaled.filter((c) => c.id !== currentItem.baseId).map((c) => scaleFood(c, factor));
   const close = candidates.filter((c) => Math.abs(c.calories - currentItem.calories) <= currentItem.calories * 0.2);
@@ -903,8 +1133,8 @@ export function getPersonalizedTips(state, metrics) {
   if ((state.chronicConditions || []).includes("liver")) tips.push("A lighter fat load and more detox-friendly dishes keep the plan aligned with liver support.");
   if ((state.chronicConditions || []).includes("kidney")) tips.push("Moderate portions of richer protein dishes and prioritize lower-sodium cooking where possible.");
   if (!tips.length) tips.push("Keep hydration steady, stay consistent with meal timing, and let the swap tools refine the plan around your preferences.");
-  tips.push(`Suggested hydration: ${Math.max(2, roundOne((metrics?.weightKg || 60) * 0.035))} L water across the day.`);
-  return tips.slice(0, 5);
+  const hydration = `Suggested hydration: ${Math.max(2, roundOne((metrics?.weightKg || 60) * 0.035))} L water across the day.`;
+  return [...tips.slice(0, 4), hydration];
 }
 
 export function getInputSignature(state) {
@@ -913,6 +1143,6 @@ export function getInputSignature(state) {
     weight: state.weight, activityLevel: state.activityLevel, goal: state.goal,
     diabeticStatus: state.diabeticStatus, hasAllergies: state.hasAllergies,
     allergyList: state.allergyList, customAllergy: (state.customAllergy || "").trim().toLowerCase(),
-    chronicConditions: state.chronicConditions
+    chronicConditions: state.chronicConditions, dietPreference: state.dietPreference
   });
 }

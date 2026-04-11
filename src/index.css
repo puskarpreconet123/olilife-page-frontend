@@ -996,6 +996,167 @@ button {
   background: var(--color-fat);
 }
 
+/* ── Diet Overview (calories + live macros) ──────────────── */
+.diet-overview {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.diet-cal-card {
+  padding: 16px 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.78);
+  border: 1px solid rgba(27,94,32,0.08);
+  box-shadow: 0 10px 20px rgba(62,39,35,0.06);
+}
+
+.diet-cal-row {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.diet-cal-unit {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(62,39,35,0.5);
+}
+
+.stat-sub--over {
+  color: #c62828;
+}
+
+/* ── Live Macros Panel ───────────────────────────────────── */
+.live-macros-panel {
+  padding: 16px 16px 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.78);
+  border: 1px solid rgba(27,94,32,0.08);
+  box-shadow: 0 10px 20px rgba(62,39,35,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.live-macros-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.live-macros-note {
+  font-size: 0.72rem;
+  color: rgba(62,39,35,0.45);
+  font-weight: 500;
+}
+
+.live-macro-row {
+  display: grid;
+  gap: 5px;
+}
+
+.live-macro-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+}
+
+.live-macro-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.live-macro-dot.protein { background: var(--color-protein); }
+.live-macro-dot.carb    { background: var(--color-carb); }
+.live-macro-dot.fat     { background: var(--color-fat); }
+
+.live-macro-label {
+  font-weight: 600;
+  color: var(--brown-900);
+  flex: 1;
+}
+
+.live-macro-grams {
+  font-size: 0.82rem;
+  color: rgba(62,39,35,0.7);
+}
+
+.live-macro-over {
+  color: #c62828;
+}
+
+.live-macro-target {
+  color: rgba(62,39,35,0.4);
+}
+
+/* ── Per-meal macro chips ────────────────────────────────── */
+.meal-macro-chips {
+  display: flex;
+  gap: 6px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+
+.macro-chip {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+.macro-chip.protein {
+  background: rgba(46,125,50,0.1);
+  color: var(--color-protein);
+}
+.macro-chip.carb {
+  background: rgba(141,110,99,0.1);
+  color: var(--color-carb);
+}
+.macro-chip.fat {
+  background: rgba(85,139,47,0.1);
+  color: var(--color-fat);
+}
+
+/* ── Food item macro pills ───────────────────────────────── */
+.food-macros-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 3px;
+}
+
+.food-portion {
+  font-size: 0.75rem;
+  color: rgba(62,39,35,0.45);
+  font-weight: 500;
+  margin-right: 2px;
+}
+
+.food-macro-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+.food-macro-pill.protein {
+  background: rgba(46,125,50,0.08);
+  color: var(--color-protein);
+}
+.food-macro-pill.carb {
+  background: rgba(141,110,99,0.08);
+  color: var(--color-carb);
+}
+.food-macro-pill.fat {
+  background: rgba(85,139,47,0.08);
+  color: var(--color-fat);
+}
+
 .product-card {
   display: flex;
   flex-direction: column;
@@ -1758,6 +1919,10 @@ h2.panel-title {
   .diet-toolbar,
   .dashboard-actions,
   .footer-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .diet-overview {
     grid-template-columns: 1fr;
   }
 

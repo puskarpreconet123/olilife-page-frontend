@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   generateDietPlan, getDietTotals, getMealTotals, getAlternativeItemsForState,
   getAlternativeMeals, getMetrics, getInputSignature, titleCase, roundOne, round
@@ -6,7 +6,6 @@ import {
 import BottomSheet from "../shared/BottomSheet";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../utils/api";
-import { showToast } from "../shared/Toast";
 
 function formatDate(iso) {
   if (!iso) return "";
@@ -14,26 +13,36 @@ function formatDate(iso) {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+const MEAL_ICONS = {
+  breakfast: "🍳",
+  lunch:     "🍱",
+  dinner:    "🥗",
+  snacks:    "🍏",
+  dessert:   "🍮",
+};
+
+const MACROS = [
+  { key: "protein", label: "Protein", cls: "protein" },
+  { key: "carbs",   label: "Carbs",   cls: "carb"    },
+  { key: "fats",    label: "Fats",    cls: "fat"     },
+];
+
 export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietSaved }) {
   const { isLoggedIn } = useAuth();
-  const [meals, setMeals]     = useState(null);
-  const [stale, setStale]     = useState(false);
-  const [sheet, setSheet]     = useState({ open: false, title: "", subtitle: "", options: [] });
+  const [meals, setMeals]   = useState(null);
+  const [stale, setStale]   = useState(false);
+  const [sheet, setSheet]   = useState({ open: false, title: "", subtitle: "", options: [] });
   const saveTimer = useRef(null);
 
-  // Restore saved diet from DB on mount / when savedDiet prop changes
   useEffect(() => {
     if (!savedDiet?.meals?.length) return;
-    const currentSig = getInputSignature(state);
     setMeals(savedDiet.meals);
-    setStale(savedDiet.inputSignature !== currentSig);
+    setStale(savedDiet.inputSignature !== getInputSignature(state));
   }, [savedDiet]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // When profile changes after diet is loaded, mark as stale
   useEffect(() => {
     if (!meals) return;
-    const currentSig = getInputSignature(state);
-    setStale(savedDiet?.inputSignature !== currentSig);
+    setStale(savedDiet?.inputSignature !== getInputSignature(state));
   }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const persistDiet = (updatedMeals) => {
@@ -137,6 +146,7 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
 
   const totals    = getDietTotals(meals);
   const remaining = metrics.dailyCalories - totals.calories;
+  const isOver    = remaining < 0;
 
   return (
     <>
@@ -161,54 +171,91 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
         <button className="btn btn-secondary" type="button" onClick={handleClear}>Clear Plan</button>
       </div>
 
-      {/* Saved timestamp */}
       {savedDiet?.generatedAt && (
         <p style={{ margin: "0 0 4px", fontSize: "0.78rem", color: "rgba(62,39,35,0.52)", textAlign: "right" }}>
           Last saved: {formatDate(savedDiet.generatedAt)}
         </p>
       )}
 
-      <div className="diet-summary">
-        <div className="diet-summary-card">
+      {/* ── Summary + Live Macros ──────────────────────────────── */}
+      <div className="diet-overview">
+
+        {/* Calorie card */}
+        <div className="diet-cal-card">
           <span className="stat-label">Planned Calories</span>
-          <strong className="stat-value">{totals.calories}</strong>
-          <div className="stat-sub">{remaining >= 0 ? `Remaining ${remaining} kcal` : `Exceeded by ${Math.abs(remaining)} kcal`}</div>
+          <div className="diet-cal-row">
+            <strong className="stat-value">{totals.calories}</strong>
+            <span className="diet-cal-unit">kcal</span>
+          </div>
+          <div className={`stat-sub ${isOver ? "stat-sub--over" : ""}`}>
+            {isOver
+              ? `${Math.abs(remaining)} kcal over target`
+              : `${remaining} kcal remaining`}
+          </div>
+          {/* Calorie progress bar */}
+          <div className="macro-track" style={{ marginTop: 10 }}>
+            <div
+              className="macro-fill protein"
+              style={{ width: `${Math.min((totals.calories / Math.max(metrics.dailyCalories, 1)) * 100, 100)}%` }}
+            />
+          </div>
         </div>
-        <div className="diet-summary-card">
-          <span className="stat-label">Live Macros</span>
-          <strong className="stat-value">{round(totals.protein)}P / {round(totals.carbs)}C / {round(totals.fats)}F</strong>
-          <div className="stat-sub">Updated with every swap</div>
+
+        {/* Live macro bars */}
+        <div className="live-macros-panel">
+          <div className="live-macros-header">
+            <span className="stat-label">Live Macros</span>
+            <span className="live-macros-note">vs daily target</span>
+          </div>
+          {MACROS.map(({ key, label, cls }) => {
+            const actual = round(totals[key]);
+            const target = metrics.macroTargets[key];
+            const pct    = Math.min((actual / Math.max(target, 1)) * 100, 100);
+            const over   = actual > target;
+            return (
+              <div key={key} className="live-macro-row">
+                <div className="live-macro-meta">
+                  <span className={`live-macro-dot ${cls}`} />
+                  <span className="live-macro-label">{label}</span>
+                  <span className="live-macro-grams">
+                    <strong className={over ? "live-macro-over" : ""}>{actual}g</strong>
+                    <span className="live-macro-target"> / {target}g</span>
+                  </span>
+                </div>
+                <div className="macro-track">
+                  <div
+                    className={`macro-fill ${cls}`}
+                    style={{ width: `${pct}%`, opacity: over ? 0.65 : 1 }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
+
       </div>
 
+      {/* ── Meal list ──────────────────────────────────────────── */}
       <div className="meal-list">
         {meals.map((meal, mealIndex) => {
           const mealTotals = getMealTotals(meal.items);
-          const icon = meal.label.toLowerCase().includes("breakfast") ? "🍳" :
-                       meal.label.toLowerCase().includes("lunch") ? "🍱" :
-                       meal.label.toLowerCase().includes("dinner") ? "🥗" :
-                       meal.label.toLowerCase().includes("snack") ? "🍏" : "🍴";
+          const icon = MEAL_ICONS[meal.mealType] || "🍴";
 
-          // Calculate macro percentages for the bar
-          const totalMacros = mealTotals.protein + mealTotals.carbs + mealTotals.fats || 1;
-          const pPct = (mealTotals.protein / totalMacros) * 100;
-          const cPct = (mealTotals.carbs / totalMacros) * 100;
-          const fPct = (mealTotals.fats / totalMacros) * 100;
+          const totalMacroG = mealTotals.protein + mealTotals.carbs + mealTotals.fats || 1;
+          const pPct = (mealTotals.protein / totalMacroG) * 100;
+          const cPct = (mealTotals.carbs   / totalMacroG) * 100;
+          const fPct = (mealTotals.fats    / totalMacroG) * 100;
 
           return (
-            <div
-              key={mealIndex}
-              className="meal-card"
-              style={{ marginBottom: "32px" }}
-            >
+            <div key={mealIndex} className="meal-card" style={{ marginBottom: "32px" }}>
+
               <div className="meal-top">
                 <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
                   <span className="meal-badge" style={{ marginTop: "2px" }}>{icon}</span>
                   <div>
                     <h4>{meal.label}</h4>
                     <div className="meal-target">
-                      Target {meal.targetCalories} kcal <br className="mobile-only" />
-                      | Actual {mealTotals.calories} kcal
+                      {meal.targetCalories} kcal target · {mealTotals.calories} kcal actual
                     </div>
                   </div>
                 </div>
@@ -226,20 +273,28 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
                     <div className="food-main">
                       <span className={`food-category-tag ${item.category.toLowerCase()}`}>{item.category}</span>
                       <strong className="food-name">{item.name}</strong>
-                      <span className="food-details">
-                        {item.portionFactor.toFixed(1)}x serving • {roundOne(item.protein)}P / {roundOne(item.carbs)}C / {roundOne(item.fats)}F
-                      </span>
+                      <div className="food-macros-row">
+                        <span className="food-portion">{item.portionFactor.toFixed(1)}× serving</span>
+                        <span className="food-macro-pill protein">{roundOne(item.protein)}g P</span>
+                        <span className="food-macro-pill carb">{roundOne(item.carbs)}g C</span>
+                        <span className="food-macro-pill fat">{roundOne(item.fats)}g F</span>
+                      </div>
                     </div>
-                    <div className="food-calories">{item.calories} <small style={{ fontSize: "0.65rem", display: "block", fontWeight: "600", opacity: 0.6 }}>kcal</small></div>
+                    <div className="food-calories">
+                      {item.calories}
+                      <small style={{ fontSize: "0.65rem", display: "block", fontWeight: 600, opacity: 0.6 }}>kcal</small>
+                    </div>
                   </button>
                 ))}
               </div>
 
+              {/* Macro distribution bar */}
               <div className="meal-macro-bar" title="Protein / Carbs / Fats balance">
                 <div className="meal-macro-segment protein" style={{ width: `${pPct}%` }} />
-                <div className="meal-macro-segment carb" style={{ width: `${cPct}%` }} />
-                <div className="meal-macro-segment fat" style={{ width: `${fPct}%` }} />
+                <div className="meal-macro-segment carb"    style={{ width: `${cPct}%` }} />
+                <div className="meal-macro-segment fat"     style={{ width: `${fPct}%` }} />
               </div>
+
             </div>
           );
         })}
