@@ -1,8 +1,7 @@
-import { getProductRecommendations, getDietTotals } from "../../utils/dietEngine";
+import { getProductRecommendations } from "../../utils/dietEngine";
 
-export default function ProductSection({ state, savedDiet }) {
-  const dietTotals = savedDiet?.meals?.length ? getDietTotals(savedDiet.meals) : null;
-  const products   = getProductRecommendations(state, dietTotals);
+export default function ProductSection({ state }) {
+  const products = getProductRecommendations(state);
 
   if (!products.length) {
     return (

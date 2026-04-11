@@ -237,7 +237,7 @@ export default function DashboardPage() {
               {/* Products */}
               <section className="panel-card section-card reveal-pop stagger-2">
                 <div className="section-head"><div><h3>Product Recommendations</h3><p>Most relevant Olilife suggestions based on your conditions.</p></div></div>
-                <ProductSection state={profile} savedDiet={savedDiet} />
+                <ProductSection state={profile} />
               </section>
 
             </div>

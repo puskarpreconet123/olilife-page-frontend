@@ -473,11 +473,18 @@ export const PRODUCT_CATALOG = [
     image:   "https://olilife.in/wp-content/uploads/2025/11/laxonova-creative-web-final-226x300.jpg"
   },
   {
-    key:     "painreliva",
-    name:    "Pain Reliva Capsules",
-    benefit: "Ayurvedic joint and bone care for active lifestyles and weight-gain diets.",
-    link:    "https://olilife.in/product/painreliva-capsule-ayurvedic-joint-pain-medicine/",
-    image:   "https://olilife.in/wp-content/uploads/2025/11/pain-reliva-capsule-image-website-final-226x300.jpg"
+    key:     "respipure",
+    name:    "Respipure",
+    benefit: "Ayurvedic lung and respiratory support — recommended for lung and respiratory conditions.",
+    link:    "https://olilife.in/product/respipure/",
+    image:   "https://olilife.in/wp-content/uploads/2025/10/A.jpg"
+  },
+  {
+    key:     "revira",
+    name:    "Revira",
+    benefit: "Ayurvedic energy and vitality booster — recommended for improving stamina and everyday energy.",
+    link:    "https://olilife.in/product/revira/",
+    image:   "https://olilife.in/wp-content/uploads/2025/11/revira-web-image-3-final.jpg"
   }
 ];
 
@@ -1099,20 +1106,17 @@ export function getAlternativeMeals(meal, mealIndex, state) {
   return options;
 }
 
-export function getProductRecommendations(state, dietTotals) {
-  const { goal, chronicConditions = [], activityLevel, diabeticStatus } = state;
-  const metrics   = getMetrics(state);
+export function getProductRecommendations(state) {
+  const { goal, chronicConditions = [], diabeticStatus } = state;
   const isDiabetic = diabeticStatus === "diabetic" || diabeticStatus === "pre-diabetic";
   const picks     = new Set();
 
   if (isDiabetic) picks.add("glucoamrit");
-  if (chronicConditions.includes("liver") || goal === "detox" || goal === "weight-loss" || chronicConditions.includes("kidney")) picks.add("oliliv");
-  if (chronicConditions.includes("digestive") || chronicConditions.includes("heart") || activityLevel === "sedentary") picks.add("digestowell");
-  if (goal === "weight-gain" || (dietTotals && dietTotals.protein > metrics.macroTargets.protein * 1.2)) picks.add("laxonova");
-  if (activityLevel === "active" || activityLevel === "moderate" || chronicConditions.includes("lung")) picks.add("painreliva");
+  if (chronicConditions.includes("liver") || chronicConditions.includes("thyroid") || chronicConditions.includes("heart") || goal === "weight-loss") picks.add("oliliv");
+  if (chronicConditions.includes("digestive")) { picks.add("laxonova"); picks.add("digestowell"); }
+  if (chronicConditions.includes("lung")) picks.add("respipure");
+  if (goal === "energy") picks.add("revira");
 
-  if (!picks.size && goal === "energy") picks.add("digestowell");
-  if (!picks.size && goal === "maintain") picks.add("digestowell");
   if (!picks.size) picks.add("oliliv");
 
   return [...picks]
