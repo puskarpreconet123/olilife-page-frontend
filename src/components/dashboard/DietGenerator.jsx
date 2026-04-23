@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  loadFoodDatabase,
   generateDietPlan, getDietTotals, getMealTotals, getAlternativeItemsForState,
   getAlternativeMeals, getMetrics, getInputSignature, titleCase, roundOne, round
 } from "../../utils/dietEngine";
@@ -29,10 +30,17 @@ const MACROS = [
 
 export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietSaved }) {
   const { isLoggedIn } = useAuth();
-  const [meals, setMeals]   = useState(null);
-  const [stale, setStale]   = useState(false);
-  const [sheet, setSheet]   = useState({ open: false, title: "", subtitle: "", options: [] });
+  const [meals, setMeals]     = useState(null);
+  const [stale, setStale]     = useState(false);
+  const [dbReady, setDbReady] = useState(false);
+  const [sheet, setSheet]     = useState({ open: false, title: "", subtitle: "", options: [] });
   const saveTimer = useRef(null);
+
+  useEffect(() => {
+    loadFoodDatabase()
+      .then(() => setDbReady(true))
+      .catch(() => setDbReady(false));
+  }, []);
 
   useEffect(() => {
     if (!savedDiet?.meals?.length) return;
@@ -63,6 +71,7 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
   };
 
   const handleGenerate = () => {
+    if (!dbReady) return;
     if (!isLoggedIn) { onRequestAuth(); return; }
     applyMeals(generateDietPlan(state));
   };
@@ -130,7 +139,9 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
     return (
       <>
         <div className="diet-toolbar">
-          <button className="btn btn-primary" type="button" onClick={handleGenerate}>Generate Diet Chart</button>
+          <button className="btn btn-primary" type="button" onClick={handleGenerate} disabled={!dbReady}>
+            {dbReady ? "Generate Diet Chart" : "Loading meals…"}
+          </button>
         </div>
         <div className="empty-state">
           Generate a 5-meal chart built around your goal, diabetic status, allergies, and chronic health conditions.
@@ -167,7 +178,7 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
       )}
 
       <div className="diet-toolbar">
-        <button className="btn btn-primary" type="button" onClick={handleGenerate}>Regenerate Diet</button>
+        <button className="btn btn-primary" type="button" onClick={handleGenerate} disabled={!dbReady}>Regenerate Diet</button>
         <button className="btn btn-secondary" type="button" onClick={handleClear}>Clear Plan</button>
       </div>
 
