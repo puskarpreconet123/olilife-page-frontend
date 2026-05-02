@@ -835,7 +835,7 @@ export function getAlternativeItemsForState(meal, currentItem, state) {
   const factor = currentItem.portionFactor || 1;
   const candidates = scaled.filter((c) => c.id !== currentItem.baseId).map((c) => scaleFood(c, factor));
   const close = candidates.filter((c) => Math.abs(c.calories - currentItem.calories) <= currentItem.calories * 0.2);
-  return close.length >= 5 ? close.slice(0, 8) : candidates.sort((a, b) => Math.abs(a.calories - currentItem.calories) - Math.abs(b.calories - currentItem.calories)).slice(0, 8);
+  return close.length >= 5 ? close.slice(0, 20) : candidates.sort((a, b) => Math.abs(a.calories - currentItem.calories) - Math.abs(b.calories - currentItem.calories)).slice(0, 20);
 }
 
 export function getAlternativeMeals(meal, mealIndex, state) {
