@@ -216,9 +216,9 @@ export default function DashboardPage() {
               <section className="panel-card section-card reveal stagger-3">
                 <div className="section-head"><div><h3>Health Summary</h3><p>Conditions and sensitivities stay visible throughout the plan.</p></div></div>
                 <div className="summary-row">
-                  <span className="summary-pill">Diabetic: {formatDiabeticStatus(profile.diabeticStatus)}</span>
-                  <span className="summary-pill neutral">Allergies: {getAllergySummary(profile)}</span>
-                  <span className="summary-pill neutral">Conditions: {formatConditions(profile.chronicConditions)}</span>
+                  <span className="summary-pill">{formatDiabeticStatus(profile.diabeticStatus)}</span>
+                  <span className="summary-pill neutral">{formatConditions(profile.chronicConditions)} disorder</span>
+                  <span className="summary-pill ">{getAllergySummary(profile)}</span>
                 </div>
               </section>
 

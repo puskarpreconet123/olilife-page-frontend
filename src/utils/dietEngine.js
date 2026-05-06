@@ -183,8 +183,8 @@ export function formatGoal(goal) {
 export function formatDiabeticStatus(status) { return status ? titleCase(status) : "Not set"; }
 export function formatConditions(conditions) {
   if (!conditions || !conditions.length) return "Not set";
-  if (conditions.includes("none")) return "None";
-  return conditions.map(titleCase).join(", ");
+  if (conditions.includes("none")) return "No ";
+  return conditions.map(titleCase).join(" disorder, ");
 }
 
 // ─── Metrics ──────────────────────────────────────────────────────────────
