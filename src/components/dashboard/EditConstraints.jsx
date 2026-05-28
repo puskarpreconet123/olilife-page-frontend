@@ -16,6 +16,17 @@ const GOALS = [
 ];
 const DIABETIC_OPTIONS = ["non-diabetic", "pre-diabetic", "diabetic"];
 const ALLERGIES        = ["dairy", "nuts", "gluten", "seafood", "eggs"];
+const REGIONAL_OPTIONS = [
+  { key: "Kolkata_Bengali", label: "Kolkata Bengali" },
+  { key: "South_Indian", label: "South Indian" },
+  { key: "Andhra_Telangana", label: "Andhra / Telangana" },
+  { key: "Assamese_Northeast", label: "Assamese / Northeast" },
+  { key: "Bihari_Jharkhandi", label: "Bihari / Jharkhandi" },
+  { key: "Odia", label: "Odia" },
+  { key: "Punjabi_North_Indian", label: "Punjabi / North Indian" },
+  { key: "Gujarati", label: "Gujarati" },
+  { key: "Marathi_Maharashtrian", label: "Marathi / Maharashtrian" }
+];
 const CONDITIONS = [
   { key: "none",      label: "None" },
   { key: "liver",     label: "Liver" },
@@ -91,7 +102,8 @@ export default function EditConstraints({ profile, onSave, saving }) {
     draft.weight && `${draft.weight} kg`,
     draft.goal && titleCase(draft.goal),
     draft.activityLevel && titleCase(draft.activityLevel),
-    draft.diabeticStatus && titleCase(draft.diabeticStatus)
+    draft.diabeticStatus && titleCase(draft.diabeticStatus),
+    draft.preferredRegionalMeal && titleCase(draft.preferredRegionalMeal)
   ].filter(Boolean).join(" · ");
 
   return (
@@ -241,6 +253,27 @@ export default function EditConstraints({ profile, onSave, saving }) {
           <ToggleRow label="Activity level" options={ACTIVITIES}        value={draft.activityLevel}  onChange={(v) => set("activityLevel", v)} />
           <ToggleRow label="Primary goal"   options={GOALS}             value={draft.goal}           onChange={(v) => set("goal", v)} />
           <ToggleRow label="Diabetic status" options={DIABETIC_OPTIONS} value={draft.diabeticStatus} onChange={(v) => set("diabeticStatus", v)} />
+
+          {/* Preferred Regional Meal Type */}
+          <div className="field-group" style={{ gap: 6 }}>
+            <label className="field-label" style={{ fontSize: "0.82rem" }} htmlFor="ec-prefRegion">Preferred Regional Meal Type</label>
+            <div className="input-shell">
+              <select
+                className="text-input"
+                id="ec-prefRegion"
+                value={draft.preferredRegionalMeal || ""}
+                onChange={(e) => set("preferredRegionalMeal", e.target.value)}
+                style={{ cursor: "pointer", padding: "12px 14px", appearance: "none", WebkitAppearance: "none", backgroundImage: "url(\"data:image/svg+xml;utf8,<svg fill='%233e2723' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center" }}
+              >
+                <option value="">Select regional type</option>
+                {REGIONAL_OPTIONS.map((opt) => (
+                  <option key={opt.key} value={opt.key}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           {/* Allergies */}
           <div className="field-group" style={{ gap: 8 }}>

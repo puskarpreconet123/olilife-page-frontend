@@ -1,4 +1,4 @@
-﻿// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 // Calorie share (`percentage`) and macro share (`macroShare`) must match per slot
 // because calories = 4·P + 4·C + 9·F. If they disagree, the slot's calorie and
@@ -97,7 +97,8 @@ export function buildFoodDatabase(rawMeals) {
       mealType: meal.type,
       tags,
       vegetarian: meal.vegetarian === "Yes",
-      diabeticFriendly: meal.diabetic_friendly === "Yes"
+      diabeticFriendly: meal.diabetic_friendly === "Yes",
+      region: meal.region || null
     };
   });
 }
@@ -576,6 +577,11 @@ function getMealCandidates(mealType, state, metrics) {
     filterByAllergies(f, state)
   );
 
+  // Filter by preferred regional meal type if specified
+  if (state.preferredRegionalMeal) {
+    candidates = candidates.filter(f => f.region === state.preferredRegionalMeal);
+  }
+
   // 2. Veg/Non-Veg Filter (PRIORITY)
   if (dietPref === 'veg') {
     candidates = candidates.filter(f => f.vegetarian);
@@ -897,6 +903,7 @@ export function getInputSignature(state) {
     allergyList: sortedList(state.allergyList),
     customAllergy: getCustomAllergyTokens(state.customAllergy).sort().join(","),
     chronicConditions: sortedList(state.chronicConditions),
-    dietPreference: state.dietPreference
+    dietPreference: state.dietPreference,
+    preferredRegionalMeal: state.preferredRegionalMeal
   });
 }

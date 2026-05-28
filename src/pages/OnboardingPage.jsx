@@ -20,12 +20,13 @@ const TOTAL_SCREENS = 7; // 0-6, dashboard is /dashboard route
 const DEFAULT_STATE = {
   age: "", gender: "", height: "", heightUnit: "cm", weight: "",
   activityLevel: "", goal: "", dietPreference: "veg", diabeticStatus: "",
-  hasAllergies: false, allergyList: [], customAllergy: "", chronicConditions: []
+  hasAllergies: false, allergyList: [], customAllergy: "", chronicConditions: [],
+  preferredRegionalMeal: ""
 };
 
 function isAgeGenderComplete(s) {
   const n = Number(s?.age);
-  return Number.isFinite(n) && n > 0 && n <= 90 && Boolean(s?.gender);
+  return Number.isFinite(n) && n > 0 && n <= 90 && Boolean(s?.gender) && Boolean(s?.preferredRegionalMeal);
 }
 function isHeightComplete(s) {
   const t = (s?.height || "").toString().trim();
@@ -51,7 +52,7 @@ function canAdvance(screen, s) {
   return false;
 }
 function validationMessage(screen) {
-  if (screen === 1) return "Please complete both your age and gender to continue.";
+  if (screen === 1) return "Please complete your age, gender, and preferred regional meal type to continue.";
   if (screen === 2) return "Please enter a valid height before continuing.";
   if (screen === 3) return "Please enter a valid weight in kilograms.";
   if (screen === 4) return "Please choose your activity level to continue.";
