@@ -262,7 +262,15 @@ export default function EditConstraints({ profile, onSave, saving }) {
                 className="text-input"
                 id="ec-prefRegion"
                 value={draft.preferredRegionalMeal || ""}
-                onChange={(e) => set("preferredRegionalMeal", e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setDraft((d) => ({
+                    ...d,
+                    preferredRegionalMeal: val,
+                    // Auto-enable classics priority when Bengali is selected
+                    prioritizeBengaliClassics: val === "Kolkata_Bengali" ? true : d.prioritizeBengaliClassics
+                  }));
+                }}
                 style={{ cursor: "pointer", padding: "12px 14px", appearance: "none", WebkitAppearance: "none", backgroundImage: "url(\"data:image/svg+xml;utf8,<svg fill='%233e2723' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center" }}
               >
                 <option value="">Select regional type</option>
@@ -274,6 +282,36 @@ export default function EditConstraints({ profile, onSave, saving }) {
               </select>
             </div>
           </div>
+
+          {draft.preferredRegionalMeal === "Kolkata_Bengali" && (
+            <div className="field-group" style={{ gap: 8, padding: "10px 14px", background: "rgba(76,175,80,0.06)", borderRadius: "8px", border: "1px solid rgba(76,175,80,0.12)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                <div>
+                  <div className="field-label" style={{ fontSize: "0.82rem", fontWeight: 600, margin: 0 }}>Prioritize Bengali Classics</div>
+                  <p style={{ margin: "2px 0 0", fontSize: "0.74rem", color: "rgba(62,39,35,0.6)", lineHeight: "1.2" }}>Weight the plan heavily toward key signature dishes.</p>
+                </div>
+                <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                  {[
+                    { val: true, lbl: "Yes" },
+                    { val: false, lbl: "No" }
+                  ].map((x) => {
+                    const active = (draft.prioritizeBengaliClassics !== false) === x.val;
+                    return (
+                      <button
+                        key={x.lbl}
+                        type="button"
+                        className={`chip-button${active ? " selected" : ""}`}
+                        style={{ fontSize: "0.74rem", padding: "6px 12px", minWidth: "40px" }}
+                        onClick={() => set("prioritizeBengaliClassics", x.val)}
+                      >
+                        {x.lbl}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Allergies */}
           <div className="field-group" style={{ gap: 8 }}>

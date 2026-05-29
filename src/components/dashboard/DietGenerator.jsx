@@ -92,8 +92,8 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
       title: `Swap ${item.name}`,
       subtitle: `Choose a similar ${item.category} option within the same meal window.`,
       options: getAlternativeItemsForState(meal, item, state).map((c) => ({
-        label: c.name,
-        subtitle: `${titleCase(c.category)} | ${c.calories} kcal | ${roundOne(c.protein)}P / ${roundOne(c.carbs)}C / ${roundOne(c.fats)}F`,
+        label: c.topPriority ? `⭐ ${c.name}` : c.name,
+        subtitle: `${titleCase(c.category)} | ${c.calories} kcal | ${roundOne(c.protein)}P / ${roundOne(c.carbs)}C / ${roundOne(c.fats)}F${c.topPriority ? " | Olilife Signature" : ""}`,
         value: { type: "item", mealIndex, itemIndex, item: c }
       }))
     });
@@ -107,9 +107,10 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
       subtitle: "Pick a fresh combo that still fits your calorie and macro balance.",
       options: getAlternativeMeals(meal, mealIndex, state).map((c) => {
         const totals = getMealTotals(c.items);
+        const hasSignature = c.items.some((i) => i.topPriority);
         return {
-          label: c.label,
-          subtitle: `Meal | ${totals.calories} kcal | ${roundOne(totals.protein)}P / ${roundOne(totals.carbs)}C / ${roundOne(totals.fats)}F`,
+          label: hasSignature ? `⭐ ${c.label}` : c.label,
+          subtitle: `Meal | ${totals.calories} kcal | ${roundOne(totals.protein)}P / ${roundOne(totals.carbs)}C / ${roundOne(totals.fats)}F${hasSignature ? " | Includes Signature" : ""}`,
           foods: c.items.map((i) => i.name).join(", "),
           value: { type: "meal", mealIndex, meal: c }
         };
@@ -283,7 +284,12 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
                   >
                     <div className="food-main">
                       <span className={`food-category-tag ${item.category.toLowerCase()}`}>{item.category}</span>
-                      <strong className="food-name">{item.name}</strong>
+                      <strong className="food-name">
+                        {item.name}
+                        {item.topPriority && (
+                          <span className="signature-badge">⭐ Signature</span>
+                        )}
+                      </strong>
                       <div className="food-macros-row">
                         <span className="food-portion">{item.portionFactor.toFixed(1)}× serving</span>
                         <span className="food-macro-pill protein">{roundOne(item.protein)}g P</span>

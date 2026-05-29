@@ -21,7 +21,7 @@ const DEFAULT_STATE = {
   age: "", gender: "", height: "", heightUnit: "cm", weight: "",
   activityLevel: "", goal: "", dietPreference: "veg", diabeticStatus: "",
   hasAllergies: false, allergyList: [], customAllergy: "", chronicConditions: [],
-  preferredRegionalMeal: ""
+  preferredRegionalMeal: "", prioritizeBengaliClassics: true
 };
 
 function isAgeGenderComplete(s) {

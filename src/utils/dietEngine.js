@@ -98,7 +98,8 @@ export function buildFoodDatabase(rawMeals) {
       tags,
       vegetarian: meal.vegetarian === "Yes",
       diabeticFriendly: meal.diabetic_friendly === "Yes",
-      region: meal.region || null
+      region: meal.region || null,
+      topPriority: meal.top_priority === true
     };
   });
 }
@@ -538,6 +539,11 @@ function getCandidateScore(food, state, metrics) {
   // Diabetic friendly bonus
   if (isDiabetic && food.tags.includes("diabetic-friendly")) score += 4;
 
+  // Bengali Classics top priority bonus
+  if (state.preferredRegionalMeal === "Kolkata_Bengali" && state.prioritizeBengaliClassics !== false && food.topPriority) {
+    score += 10;
+  }
+
   // Macro ratio alignment — calorie-based (protein/carbs = 4 kcal/g, fats = 9 kcal/g)
   // Gram-based ratios are wrong because 1g fat ≠ 1g protein in energy contribution
   const targets   = metrics.macroTargets;
@@ -904,6 +910,7 @@ export function getInputSignature(state) {
     customAllergy: getCustomAllergyTokens(state.customAllergy).sort().join(","),
     chronicConditions: sortedList(state.chronicConditions),
     dietPreference: state.dietPreference,
-    preferredRegionalMeal: state.preferredRegionalMeal
+    preferredRegionalMeal: state.preferredRegionalMeal,
+    prioritizeBengaliClassics: state.prioritizeBengaliClassics
   });
 }

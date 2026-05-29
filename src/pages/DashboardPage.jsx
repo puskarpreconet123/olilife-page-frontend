@@ -17,7 +17,8 @@ import useScrollReveal from "../hooks/useScrollReveal";
 const DEFAULT_PROFILE = {
   age: "", gender: "", height: "", heightUnit: "cm", weight: "",
   activityLevel: "", goal: "", diabeticStatus: "", hasAllergies: false,
-  allergyList: [], customAllergy: "", chronicConditions: []
+  allergyList: [], customAllergy: "", chronicConditions: [],
+  preferredRegionalMeal: "", prioritizeBengaliClassics: true
 };
 
 export default function DashboardPage() {
