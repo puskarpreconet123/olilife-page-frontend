@@ -844,10 +844,16 @@ export function getDietTotals(meals) {
 
 export function getAlternativeItemsForState(meal, currentItem, state) {
   const scaled = getMealCandidates(meal.mealType, state, getMetrics(state));
-  const factor = currentItem.portionFactor || 1;
-  const candidates = scaled.filter((c) => c.id !== currentItem.baseId).map((c) => scaleFood(c, factor));
-  const close = candidates.filter((c) => Math.abs(c.calories - currentItem.calories) <= 10);
-  return close.length > 0 ? close.slice(0, 20) : candidates.sort((a, b) => Math.abs(a.calories - currentItem.calories) - Math.abs(b.calories - currentItem.calories)).slice(0, 20);
+  const targetCalories = meal.targetCalories || currentItem.calories;
+  
+  const candidates = scaled.filter((c) => c.id !== currentItem.baseId).map((c) => {
+    // Calculate the unique factor required for this specific candidate to hit targetCalories
+    const factor = clamp(targetCalories / atwaterCalories(c), 0.4, 2.5);
+    return scaleFood(c, factor);
+  });
+  
+  const close = candidates.filter((c) => Math.abs(c.calories - targetCalories) <= 10);
+  return close.length > 0 ? close.slice(0, 20) : candidates.sort((a, b) => Math.abs(a.calories - targetCalories) - Math.abs(b.calories - targetCalories)).slice(0, 20);
 }
 
 export function getAlternativeMeals(meal, mealIndex, state) {

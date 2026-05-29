@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   loadFoodDatabase,
   generateDietPlan, getDietTotals, getMealTotals, getAlternativeItemsForState,
@@ -34,6 +35,7 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
   const [stale, setStale]     = useState(false);
   const [dbReady, setDbReady] = useState(false);
   const [sheet, setSheet]     = useState({ open: false, title: "", subtitle: "", options: [] });
+  const [detailModal, setDetailModal] = useState({ open: false, mealIndex: null, itemIndex: null });
   const saveTimer = useRef(null);
 
   useEffect(() => {
@@ -97,6 +99,21 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
         value: { type: "item", mealIndex, itemIndex, item: c }
       }))
     });
+  };
+
+  const handleFoodClick = (mealIndex, itemIndex) => {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      setDetailModal({ open: true, mealIndex, itemIndex });
+    } else {
+      openItemSheet(mealIndex, itemIndex);
+    }
+  };
+
+  const handleSwapFromDetail = () => {
+    const { mealIndex, itemIndex } = detailModal;
+    setDetailModal({ open: false, mealIndex: null, itemIndex: null });
+    openItemSheet(mealIndex, itemIndex);
   };
 
   const openMealSheet = (mealIndex) => {
@@ -280,7 +297,7 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
                     key={itemIndex}
                     className={`food-swap ${item.category.toLowerCase()}`}
                     type="button"
-                    onClick={() => openItemSheet(mealIndex, itemIndex)}
+                    onClick={() => handleFoodClick(mealIndex, itemIndex)}
                   >
                     <div className="food-main">
                       <span className={`food-category-tag ${item.category.toLowerCase()}`}>{item.category}</span>
@@ -325,6 +342,82 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
         onClose={closeSheet}
         onSelect={applySheetOption}
       />
+
+      {detailModal.open && (() => {
+        const meal = meals[detailModal.mealIndex];
+        const item = meal.items[detailModal.itemIndex];
+        return createPortal(
+          <div className="modal-overlay show" onClick={(e) => { if (e.target === e.currentTarget) setDetailModal({ open: false, mealIndex: null, itemIndex: null }); }}>
+            <div className="modal-box meal-detail-modal" style={{ padding: "0 0 20px" }}>
+              <div className="modal-header" style={{ padding: "20px 20px 14px" }}>
+                <button className="modal-close-btn" type="button" onClick={() => setDetailModal({ open: false, mealIndex: null, itemIndex: null })}>✕</button>
+                <div className="modal-brand-icon" style={{ background: "rgba(76, 175, 80, 0.12)", color: "var(--green-900)" }}>
+                  {MEAL_ICONS[meal.mealType] || "🍳"}
+                </div>
+                <h3>{meal.label} Detail</h3>
+                <p style={{ fontSize: "0.84rem", marginTop: "4px" }}>Review full nutrition and serving size details.</p>
+              </div>
+              <div className="modal-body" style={{ display: "flex", flexDirection: "column", gap: 16, padding: "0 20px" }}>
+                <div style={{ textAlign: "center", padding: "10px 0" }}>
+                  <h4 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--brown-900)", lineHeight: 1.35, margin: "0 0 8px" }}>
+                    {item.name}
+                  </h4>
+                  {item.topPriority && (
+                    <span className="signature-badge" style={{ margin: "4px auto 0", display: "inline-flex" }}>⭐ Signature</span>
+                  )}
+                  <div style={{ marginTop: 12, fontSize: "0.86rem", color: "rgba(62, 39, 35, 0.6)" }}>
+                    Portion: <strong style={{ color: "var(--brown-900)" }}>{item.portionFactor.toFixed(1)}× serving</strong>
+                  </div>
+                </div>
+
+                {/* Calorie Card */}
+                <div style={{ background: "rgba(76,175,80,0.06)", border: "1px solid rgba(76,175,80,0.12)", borderRadius: 16, padding: "14px 18px", textAlign: "center" }}>
+                  <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "rgba(62, 39, 35, 0.5)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Total Energy</span>
+                  <div style={{ fontSize: "2rem", fontWeight: 900, color: "var(--color-calories)" }}>
+                    {item.calories} <span style={{ fontSize: "1rem", fontWeight: 600, color: "rgba(62,39,35,0.5)" }}>kcal</span>
+                  </div>
+                </div>
+
+                {/* Macros Grid */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                  {[
+                    { val: `${roundOne(item.protein)}g`, lbl: "Protein", cls: "protein" },
+                    { val: `${roundOne(item.carbs)}g`, lbl: "Carbs", cls: "carb" },
+                    { val: `${roundOne(item.fats)}g`, lbl: "Fats", cls: "fat" }
+                  ].map((m) => (
+                    <div key={m.lbl} style={{ background: "rgba(62, 39, 35, 0.03)", borderRadius: 12, padding: "10px 8px", textAlign: "center" }}>
+                      <span className={`food-macro-pill ${m.cls}`} style={{ display: "inline-block", marginBottom: 4, fontSize: "0.68rem" }}>{m.lbl}</span>
+                      <div style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--brown-900)" }}>{m.val}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ display: "flex", gap: 8, background: "rgba(62, 39, 35, 0.02)", borderRadius: 12, padding: "10px 14px", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "rgba(62,39,35,0.6)" }}>Dietary Fiber</span>
+                  <strong style={{ fontSize: "0.94rem", color: "var(--brown-900)" }}>{roundOne(item.fiber || 0)}g</strong>
+                </div>
+
+                {item.region && (
+                  <div style={{ display: "flex", gap: 8, background: "rgba(62, 39, 35, 0.02)", borderRadius: 12, padding: "10px 14px", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "rgba(62,39,35,0.6)" }}>Cuisine / Region</span>
+                    <strong style={{ fontSize: "0.94rem", color: "var(--brown-900)" }}>{titleCase(item.region)}</strong>
+                  </div>
+                )}
+
+                <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 10, marginTop: 12 }}>
+                  <button className="btn btn-primary" type="button" onClick={handleSwapFromDetail}>
+                    Swap this Dish
+                  </button>
+                  <button className="btn btn-secondary" type="button" onClick={() => setDetailModal({ open: false, mealIndex: null, itemIndex: null })}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
+        );
+      })()}
     </>
   );
 }
