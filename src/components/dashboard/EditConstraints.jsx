@@ -15,6 +15,10 @@ const GOALS = [
   { key: "energy",      label: "Energy" }
 ];
 const DIABETIC_OPTIONS = ["non-diabetic", "pre-diabetic", "diabetic"];
+const DIET_PREFERENCES = [
+  { key: "veg", label: "Veg" },
+  { key: "non-veg", label: "Non-Veg" }
+];
 const ALLERGIES        = ["dairy", "nuts", "gluten", "seafood", "eggs"];
 const REGIONAL_OPTIONS = [
   { key: "Kolkata_Bengali", label: "Kolkata Bengali" },
@@ -253,6 +257,7 @@ export default function EditConstraints({ profile, onSave, saving }) {
           <ToggleRow label="Activity level" options={ACTIVITIES}        value={draft.activityLevel}  onChange={(v) => set("activityLevel", v)} />
           <ToggleRow label="Primary goal"   options={GOALS}             value={draft.goal}           onChange={(v) => set("goal", v)} />
           <ToggleRow label="Diabetic status" options={DIABETIC_OPTIONS} value={draft.diabeticStatus} onChange={(v) => set("diabeticStatus", v)} />
+          <ToggleRow label="Diet preference" options={DIET_PREFERENCES} value={draft.dietPreference} onChange={(v) => set("dietPreference", v)} />
 
           {/* Preferred Regional Meal Type */}
           <div className="field-group" style={{ gap: 6 }}>
