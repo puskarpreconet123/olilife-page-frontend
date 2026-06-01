@@ -717,15 +717,12 @@ function buildSlotOptions(config, excludeSignatures, state) {
   return options;
 }
 
-// Back-compat thin wrapper: returns the single best option for a slot.
-// `seed` is retained for callers that still pass it (e.g. getAlternativeMeals
-// which uses it to produce a small set of diverse options).
 export function generateMealOption(config, seed, excludeSignatures, state) {
   const options = buildSlotOptions(config, excludeSignatures, state);
   if (!options.length) return null;
-  // Use seed to pick among the top few so getAlternativeMeals returns diverse suggestions.
-  const n = options.length;
-  const idx = ((seed % n) + n) % n;
+  // Use seed to pick among the top 3 options to ensure high quality matches
+  const topCount = Math.min(3, options.length);
+  const idx = ((seed % topCount) + topCount) % topCount;
   return options[idx];
 }
 
@@ -743,51 +740,12 @@ export function generateDietPlan(state) {
   const meals = [];
 
   MEAL_CONFIGS.forEach((config) => {
-    const meal = generateMealOption(config, 0, new Set(), state);
+    const seed = Math.floor(Math.random() * 3);
+    const meal = generateMealOption(config, seed, new Set(), state);
     if (meal) meals.push(meal);
   });
 
-  // Greedy daily-macro optimizer: at each iteration, evaluate EVERY candidate
-  // for every slot as a potential swap and apply the one that most reduces
-  // total daily macro deviation. Handles both overshoot and undershoot.
-  const dailyTargets = metrics.macroTargets;
-  const MAX_ITERATIONS = 8;
-
-  for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
-    const currentTotals = getDietTotals(meals);
-    const currentDev = dailyMacroDeviation(currentTotals, dailyTargets);
-    if (currentDev < 0.05) break; // within ~5% total deviation, done
-
-    let bestImprove = 0;
-    let bestI = -1;
-    let bestAlt = null;
-
-    meals.forEach((meal, i) => {
-      const config = MEAL_CONFIGS.find(c => c.key === meal.mealType);
-      if (!config || !config.macroShare) return;
-
-      const origItemsTotals = getMealTotals(meal.items);
-      const slotOptions = buildSlotOptions(config, new Set([meal.signature]), state);
-
-      for (const alt of slotOptions) {
-        const altItemsTotals = getMealTotals(alt.items);
-        const hypotheticalDaily = {
-          protein: currentTotals.protein - origItemsTotals.protein + altItemsTotals.protein,
-          carbs:   currentTotals.carbs   - origItemsTotals.carbs   + altItemsTotals.carbs,
-          fats:    currentTotals.fats    - origItemsTotals.fats    + altItemsTotals.fats,
-        };
-        const improve = currentDev - dailyMacroDeviation(hypotheticalDaily, dailyTargets);
-        if (improve > bestImprove) {
-          bestImprove = improve;
-          bestI = i;
-          bestAlt = alt;
-        }
-      }
-    });
-
-    if (bestI < 0 || bestImprove < 0.005) break;
-    meals[bestI] = bestAlt;
-  }
+  
 
   // Final calorie balance: scale each meal's items by a uniform multiplier so
   // the daily total lands near dailyCalories. Uniform scaling preserves each
