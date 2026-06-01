@@ -94,8 +94,8 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
       title: `Swap ${item.name}`,
       subtitle: `Choose a similar ${item.category} option within the same meal window.`,
       options: getAlternativeItemsForState(meal, item, state).map((c) => ({
-        label: c.topPriority ? `⭐ ${c.name}` : c.name,
-        subtitle: `${titleCase(c.category)} | ${c.calories} kcal | ${roundOne(c.protein)}P / ${roundOne(c.carbs)}C / ${roundOne(c.fats)}F${c.topPriority ? " | Olilife Signature" : ""}`,
+        label: c.name,
+        subtitle: `${titleCase(c.category)} | ${c.calories} kcal | ${roundOne(c.protein)}P / ${roundOne(c.carbs)}C / ${roundOne(c.fats)}F`,
         value: { type: "item", mealIndex, itemIndex, item: c }
       }))
     });
@@ -120,14 +120,14 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
     const meal = meals[mealIndex];
     setSheet({
       open: true,
-      title: `Replace ${meal.label}`,
+      // title: `Replace ${meal.label}`,
+      title: `Other Options`,
       subtitle: "Pick a fresh combo that still fits your calorie and macro balance.",
       options: getAlternativeMeals(meal, mealIndex, state).map((c) => {
         const totals = getMealTotals(c.items);
-        const hasSignature = c.items.some((i) => i.topPriority);
         return {
-          label: hasSignature ? `⭐ ${c.label}` : c.label,
-          subtitle: `Meal | ${totals.calories} kcal | ${roundOne(totals.protein)}P / ${roundOne(totals.carbs)}C / ${roundOne(totals.fats)}F${hasSignature ? " | Includes Signature" : ""}`,
+          label: c.label,
+          subtitle: `Meal | ${totals.calories} kcal | ${roundOne(totals.protein)}P / ${roundOne(totals.carbs)}C / ${roundOne(totals.fats)}F`,
           foods: c.items.map((i) => i.name).join(", "),
           value: { type: "meal", mealIndex, meal: c }
         };
@@ -288,7 +288,7 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
                     </div>
                   </div>
                 </div>
-                <button className="meal-action" type="button" onClick={() => openMealSheet(mealIndex)}>Replace</button>
+                <button className="meal-action" type="button" onClick={() => openMealSheet(mealIndex)}>Options</button>
               </div>
 
               <div className="food-list">
@@ -303,9 +303,6 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
                       <span className={`food-category-tag ${item.category.toLowerCase()}`}>{item.category}</span>
                       <strong className="food-name">
                         {item.name}
-                        {item.topPriority && (
-                          <span className="signature-badge">⭐ Signature</span>
-                        )}
                       </strong>
                       <div className="food-macros-row">
                         <span className="food-portion">{item.portionFactor.toFixed(1)}× serving</span>
@@ -362,9 +359,7 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
                   <h4 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--brown-900)", lineHeight: 1.35, margin: "0 0 8px" }}>
                     {item.name}
                   </h4>
-                  {item.topPriority && (
-                    <span className="signature-badge" style={{ margin: "4px auto 0", display: "inline-flex" }}>⭐ Signature</span>
-                  )}
+
                   <div style={{ marginTop: 12, fontSize: "0.86rem", color: "rgba(62, 39, 35, 0.6)" }}>
                     Portion: <strong style={{ color: "var(--brown-900)" }}>{item.portionFactor.toFixed(1)}× serving</strong>
                   </div>

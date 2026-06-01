@@ -81,6 +81,8 @@ function ToggleRow({ label, options, value, onChange, multi = false }) {
 export default function EditConstraints({ profile, onSave, saving }) {
   const [open, setOpen]     = useState(false);
   const [draft, setDraft]   = useState(profile);
+  const [localFt, setLocalFt] = useState("");
+  const [localIn, setLocalIn] = useState("");
   const [heightError, setHeightError] = useState("");
   const [ageError, setAgeError] = useState("");
   const [weightError, setWeightError] = useState("");
@@ -88,7 +90,45 @@ export default function EditConstraints({ profile, onSave, saving }) {
   // Sync draft when profile changes from outside (e.g. initial load)
   React.useEffect(() => { setDraft(profile); }, [profile]);
 
+  React.useEffect(() => {
+    if (draft.heightUnit === "ft") {
+      if (draft.height) {
+        const val = Number(draft.height);
+        if (!isNaN(val)) {
+          const f = Math.floor(val);
+          const i = Math.round((val - f) * 12);
+          const localVal = (Number(localFt || 0) + Number(localIn || 0) / 12);
+          if (Math.abs(val - localVal) > 0.01 || (localFt === "" && localIn === "")) {
+            setLocalFt(f.toString());
+            setLocalIn(i === 0 && val === f ? "" : i.toString());
+          }
+        } else {
+          setLocalFt("");
+          setLocalIn("");
+        }
+      } else {
+        setLocalFt("");
+        setLocalIn("");
+      }
+    }
+  }, [draft.height, draft.heightUnit]);
+
   const set = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
+
+  const updateParentHeight = (feetStr, inchStr) => {
+    if (!feetStr && !inchStr) {
+      set("height", "");
+      return;
+    }
+    const f = feetStr ? parseInt(feetStr, 10) : 0;
+    const i = inchStr ? parseInt(inchStr, 10) : 0;
+    
+    if (f === 0 && i === 0) {
+      set("height", "");
+    } else {
+      set("height", (f + i / 12).toFixed(2));
+    }
+  };
 
   const handleSave = () => {
     onSave(draft);
@@ -206,32 +246,89 @@ export default function EditConstraints({ profile, onSave, saving }) {
           <div className="field-group" style={{ gap: 6 }}>
             <div className="field-label" style={{ fontSize: "0.82rem" }}>Height</div>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <div style={{ flex: 1 }}>
-                <input
-                  className="text-input"
-                  inputMode="decimal"
-                  placeholder={draft.heightUnit === "cm" ? "cm" : "feet"}
-                  type="text"
-                  value={draft.height}
-                  onChange={(e) => {
-                    let val = e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
-                    if (val) {
-                      const max = draft.heightUnit === "cm" ? 300 : 10;
-                      if (parseFloat(val) > max) {
-                        val = max.toString();
-                        setHeightError(`Maximum allowed height is ${max} ${draft.heightUnit}.`);
+              {draft.heightUnit === "cm" ? (
+                <div style={{ flex: 1 }}>
+                  <input
+                    className="text-input"
+                    inputMode="decimal"
+                    placeholder="cm"
+                    type="text"
+                    value={draft.height}
+                    onChange={(e) => {
+                      let val = e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
+                      if (val) {
+                        const max = 300;
+                        if (parseFloat(val) > max) {
+                          val = max.toString();
+                          setHeightError(`Maximum allowed height is ${max} cm.`);
+                        } else {
+                          setHeightError("");
+                        }
                       } else {
                         setHeightError("");
                       }
-                    } else {
-                      setHeightError("");
-                    }
-                    if (e.target.value !== val) e.target.value = val;
-                    set("height", val);
-                  }}
-                  style={{ padding: "12px 14px" }}
-                />
-              </div>
+                      if (e.target.value !== val) e.target.value = val;
+                      set("height", val);
+                    }}
+                    style={{ padding: "12px 14px" }}
+                  />
+                </div>
+              ) : (
+                <div style={{ flex: 1, display: "flex", gap: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <input
+                      className="text-input"
+                      inputMode="numeric"
+                      placeholder="ft"
+                      type="text"
+                      value={localFt}
+                      onChange={(e) => {
+                        let val = e.target.value.replace(/[^0-9]/g, "");
+                        if (val) {
+                          const f = parseInt(val, 10);
+                          if (f > 10) {
+                            setHeightError("Maximum height is 10 feet.");
+                            val = "10";
+                          } else {
+                            setHeightError("");
+                          }
+                        } else {
+                          setHeightError("");
+                        }
+                        setLocalFt(val);
+                        updateParentHeight(val, localIn);
+                      }}
+                      style={{ padding: "12px 14px" }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <input
+                      className="text-input"
+                      inputMode="numeric"
+                      placeholder="in"
+                      type="text"
+                      value={localIn}
+                      onChange={(e) => {
+                        let val = e.target.value.replace(/[^0-9]/g, "");
+                        if (val) {
+                          const i = parseInt(val, 10);
+                          if (i >= 12) {
+                            setHeightError("Inches must be less than 12.");
+                            val = "11";
+                          } else {
+                            setHeightError("");
+                          }
+                        } else {
+                          setHeightError("");
+                        }
+                        setLocalIn(val);
+                        updateParentHeight(localFt, val);
+                      }}
+                      style={{ padding: "12px 14px" }}
+                    />
+                  </div>
+                </div>
+              )}
               {["cm","ft"].map((u) => (
                 <button
                   key={u}
@@ -269,12 +366,7 @@ export default function EditConstraints({ profile, onSave, saving }) {
                 value={draft.preferredRegionalMeal || ""}
                 onChange={(e) => {
                   const val = e.target.value;
-                  setDraft((d) => ({
-                    ...d,
-                    preferredRegionalMeal: val,
-                    // Auto-enable classics priority when Bengali is selected
-                    prioritizeBengaliClassics: val === "Kolkata_Bengali" ? true : d.prioritizeBengaliClassics
-                  }));
+                  set("preferredRegionalMeal", val);
                 }}
                 style={{ cursor: "pointer", padding: "12px 14px", appearance: "none", WebkitAppearance: "none", backgroundImage: "url(\"data:image/svg+xml;utf8,<svg fill='%233e2723' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 14px center" }}
               >
@@ -288,35 +380,7 @@ export default function EditConstraints({ profile, onSave, saving }) {
             </div>
           </div>
 
-          {draft.preferredRegionalMeal === "Kolkata_Bengali" && (
-            <div className="field-group" style={{ gap: 8, padding: "10px 14px", background: "rgba(76,175,80,0.06)", borderRadius: "8px", border: "1px solid rgba(76,175,80,0.12)" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                <div>
-                  <div className="field-label" style={{ fontSize: "0.82rem", fontWeight: 600, margin: 0 }}>Prioritize Bengali Classics</div>
-                  <p style={{ margin: "2px 0 0", fontSize: "0.74rem", color: "rgba(62,39,35,0.6)", lineHeight: "1.2" }}>Weight the plan heavily toward key signature dishes.</p>
-                </div>
-                <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                  {[
-                    { val: true, lbl: "Yes" },
-                    { val: false, lbl: "No" }
-                  ].map((x) => {
-                    const active = (draft.prioritizeBengaliClassics !== false) === x.val;
-                    return (
-                      <button
-                        key={x.lbl}
-                        type="button"
-                        className={`chip-button${active ? " selected" : ""}`}
-                        style={{ fontSize: "0.74rem", padding: "6px 12px", minWidth: "40px" }}
-                        onClick={() => set("prioritizeBengaliClassics", x.val)}
-                      >
-                        {x.lbl}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
+
 
           {/* Allergies */}
           <div className="field-group" style={{ gap: 8 }}>

@@ -8,8 +8,8 @@
 // bonus (5% of baseCalories, gated on BMI<25) and contributes 0 to macro targets.
 export const MEAL_CONFIGS = [
   { key: "breakfast", label: "Breakfast", percentage: 0.30, macroShare: 0.30 },
-  { key: "lunch",     label: "Lunch",     percentage: 0.35, macroShare: 0.35 },
-  { key: "dinner",    label: "Dinner",    percentage: 0.25, macroShare: 0.25 },
+  { key: "lunch",     label: "Lunch",     percentage: 0.30, macroShare: 0.30 },
+  { key: "dinner",    label: "Dinner",    percentage: 0.30, macroShare: 0.30 },
   { key: "snacks",    label: "Snacks",    percentage: 0.10, macroShare: 0.10 },
   { key: "dessert",   label: "Dessert",   percentage: 0.05, macroShare: 0    }
 ];
@@ -539,10 +539,6 @@ function getCandidateScore(food, state, metrics) {
   // Diabetic friendly bonus
   if (isDiabetic && food.tags.includes("diabetic-friendly")) score += 4;
 
-  // Bengali Classics top priority bonus
-  if (state.preferredRegionalMeal === "Kolkata_Bengali" && state.prioritizeBengaliClassics !== false && food.topPriority) {
-    score += 10;
-  }
 
   // Macro ratio alignment — calorie-based (protein/carbs = 4 kcal/g, fats = 9 kcal/g)
   // Gram-based ratios are wrong because 1g fat ≠ 1g protein in energy contribution
@@ -916,7 +912,6 @@ export function getInputSignature(state) {
     customAllergy: getCustomAllergyTokens(state.customAllergy).sort().join(","),
     chronicConditions: sortedList(state.chronicConditions),
     dietPreference: state.dietPreference,
-    preferredRegionalMeal: state.preferredRegionalMeal,
-    prioritizeBengaliClassics: state.prioritizeBengaliClassics
+    preferredRegionalMeal: state.preferredRegionalMeal
   });
 }
