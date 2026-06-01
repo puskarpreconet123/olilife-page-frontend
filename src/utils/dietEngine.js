@@ -827,6 +827,21 @@ export function generateDietPlan(state) {
     }
   }
 
+  // Adjust remaining calories by adding them to breakfast or snacks
+  const finalTotals = getDietTotals(meals);
+  const remaining = metrics.dailyCalories - finalTotals.calories;
+  if (remaining > 0) {
+    const mealToAdjust = meals.find((m) => m.mealType === "breakfast") || meals.find((m) => m.mealType === "snacks");
+    if (mealToAdjust && mealToAdjust.items && mealToAdjust.items.length > 0) {
+      const mealTotals = getMealTotals(mealToAdjust.items);
+      if (mealTotals.calories > 0) {
+        const adjustFactor = (mealTotals.calories + remaining) / mealTotals.calories;
+        const clampedFactor = clamp(adjustFactor, 1.0, 2.5);
+        mealToAdjust.items = mealToAdjust.items.map((item) => rescaleItem(item, clampedFactor));
+      }
+    }
+  }
+
   return meals;
 }
 
