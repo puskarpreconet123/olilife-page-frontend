@@ -18,7 +18,8 @@ const DEFAULT_PROFILE = {
   age: "", gender: "", height: "", heightUnit: "cm", weight: "",
   activityLevel: "", goal: "", diabeticStatus: "", hasAllergies: false,
   allergyList: [], customAllergy: "", chronicConditions: [],
-  preferredRegionalMeal: "", prioritizeBengaliClassics: true
+  preferredRegionalMeal: "", prioritizeBengaliClassics: true,
+  dietPreference: "veg"
 };
 
 export default function DashboardPage() {

@@ -2123,6 +2123,7 @@ h2.panel-title {
   .dashboard-columns {
     grid-template-columns: 420px 1fr;
     gap: 24px;
+    align-items: start;
   }
 
   .dashboard-content {
