@@ -565,6 +565,20 @@ function getCandidateScore(food, state, metrics) {
   if (state.goal === "weight-loss" && food.tags.includes("low-fat")) score += 1;
   if (state.goal === "weight-gain" && food.calories >= 400) score += 1;
 
+  // Diet preference adjustments: boost non-veg meals, especially fish & chicken
+  const dietPref = state.dietPreference || 'non-veg';
+  if (dietPref === 'non-veg') {
+    if (!food.vegetarian) {
+      score += 10;
+      const nameLower = (food.name || "").toLowerCase();
+      const isFish = /fish|mach|macher|prawn|chingri|shrimp|crab|rohu|pomfret|sardine|hilsa|ilish|rui|katla|mouri|mourala|pabda|chepala|masor|maas/i.test(nameLower);
+      const isChicken = /chicken|murgi|murgh|kodi|kukhura/i.test(nameLower);
+      if (isFish || isChicken) {
+        score += 25;
+      }
+    }
+  }
+
   return score;
 }
 
@@ -580,6 +594,11 @@ function getMealCandidates(mealType, state, metrics, mode = "default") {
     }
     if (dietPref === 'veg') {
       filtered = filtered.filter(f => f.vegetarian);
+    } else if (dietPref === 'non-veg' && (mealType === 'lunch' || mealType === 'dinner')) {
+      const nonVegOnly = filtered.filter(f => !f.vegetarian);
+      if (nonVegOnly.length > 0) {
+        filtered = nonVegOnly;
+      }
     }
     if (isDiabetic) {
       filtered = filtered.filter(f => f.diabeticFriendly);
