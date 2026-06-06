@@ -573,35 +573,43 @@ function getMealCandidates(mealType, state, metrics, mode = "default") {
   const avoidTags = getHardAvoidTags(state.chronicConditions);
   const dietPref = state.dietPreference || 'non-veg';
 
+  const runFilterPipeline = (items, regionVal) => {
+    let filtered = items;
+    if (regionVal) {
+      filtered = filtered.filter(f => f.region === regionVal);
+    }
+    if (dietPref === 'veg') {
+      filtered = filtered.filter(f => f.vegetarian);
+    }
+    if (isDiabetic) {
+      filtered = filtered.filter(f => f.diabeticFriendly);
+    }
+    filtered = filtered.filter(f => !f.tags.some(t => avoidTags.has(t)));
+    return filtered;
+  };
+
   // 1. Basic filtering (meal type and allergies)
-  let candidates = foodDatabase.filter((f) =>
+  const baseCandidates = foodDatabase.filter((f) =>
     f.mealType === mealType &&
     filterByAllergies(f, state)
   );
 
-  // Filter by preferred regional meal type if specified
+  let candidates = [];
   if (state.preferredRegionalMeal === "Kolkata_Bengali") {
-    if (mode === "generation") {
-      candidates = candidates.filter(f => f.region === "Kolkata_Bengali_New");
+    if (mode === "generation" && state.prioritizeBengaliClassics !== false) {
+      candidates = runFilterPipeline(baseCandidates, "Kolkata_Bengali_New");
+      // Fallback to broader Kolkata_Bengali if no candidates survive (e.g. due to veg/allergy filters)
+      if (candidates.length === 0) {
+        candidates = runFilterPipeline(baseCandidates, "Kolkata_Bengali");
+      }
     } else {
-      candidates = candidates.filter(f => f.region === "Kolkata_Bengali");
+      candidates = runFilterPipeline(baseCandidates, "Kolkata_Bengali");
     }
   } else if (state.preferredRegionalMeal) {
-    candidates = candidates.filter(f => f.region === state.preferredRegionalMeal);
+    candidates = runFilterPipeline(baseCandidates, state.preferredRegionalMeal);
+  } else {
+    candidates = runFilterPipeline(baseCandidates, null);
   }
-
-  // 2. Veg/Non-Veg Filter (PRIORITY)
-  if (dietPref === 'veg') {
-    candidates = candidates.filter(f => f.vegetarian);
-  }
-
-  // 3. Disease Filter (PRIORITY: Diabetic Friendly)
-  if (isDiabetic) {
-    candidates = candidates.filter(f => f.diabeticFriendly);
-  }
-
-  // 4. Chronic Condition Avoidance (PRIORITY)
-  candidates = candidates.filter(f => !f.tags.some(t => avoidTags.has(t)));
 
   // 5. Score and sort by relevance
   return candidates
