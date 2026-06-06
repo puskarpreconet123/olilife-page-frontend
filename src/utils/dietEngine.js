@@ -596,7 +596,7 @@ function getMealCandidates(mealType, state, metrics, mode = "default") {
 
   let candidates = [];
   if (state.preferredRegionalMeal === "Kolkata_Bengali") {
-    if (mode === "generation" && state.prioritizeBengaliClassics !== false) {
+    if (mode === "generation") {
       candidates = runFilterPipeline(baseCandidates, "Kolkata_Bengali_New");
       // Fallback to broader Kolkata_Bengali if no candidates survive (e.g. due to veg/allergy filters)
       if (candidates.length === 0) {
