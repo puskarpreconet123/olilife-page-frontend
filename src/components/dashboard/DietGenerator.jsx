@@ -387,15 +387,12 @@ export default function DietGenerator({ state, savedDiet, onRequestAuth, onDietS
                   ))}
                 </div>
 
-                <div style={{ display: "flex", gap: 8, background: "rgba(62, 39, 35, 0.02)", borderRadius: 12, padding: "10px 14px", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "rgba(62,39,35,0.6)" }}>Dietary Fiber</span>
-                  <strong style={{ fontSize: "0.94rem", color: "var(--brown-900)" }}>{roundOne(item.fiber || 0)}g</strong>
-                </div>
-
                 {item.region && (
                   <div style={{ display: "flex", gap: 8, background: "rgba(62, 39, 35, 0.02)", borderRadius: 12, padding: "10px 14px", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "rgba(62,39,35,0.6)" }}>Cuisine / Region</span>
-                    <strong style={{ fontSize: "0.94rem", color: "var(--brown-900)" }}>{titleCase(item.region)}</strong>
+                    <strong style={{ fontSize: "0.94rem", color: "var(--brown-900)" }}>
+                      {item.region.replace(/_/g, " ").split(/[\s-]+/).filter(Boolean).map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(" ")}
+                    </strong>
                   </div>
                 )}
 
